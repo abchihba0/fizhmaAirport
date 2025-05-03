@@ -23,8 +23,7 @@ int main() {
             case 5: airplanes[i] = new RescuePlane(); break;
         }
 
-        std::cout << "Created: " << airplanes[i]->getType() 
-                  << " (VPP: " << airplanes[i]->getVppLength() << "m)\n";
+        std::cout << "Created: " << airplanes[i]->getType() << " (VPP: " << airplanes[i]->getVppLength() << "m)\n";
     }
 
     for (int i = 0; i < 10; i++) {
