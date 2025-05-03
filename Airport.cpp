@@ -5,7 +5,7 @@ VPP::VPP(int lenght_) :lenght(lenght_), status(false)
 {
 }
 
-Airport::Airport():count_airplane(0),count_vpp(0),vpps(nullptr),manager(nullptr)
+Airport::Airport():count_airplane(0),count_vpp(0),vpps({}),manager({})
 {
 }
 
@@ -18,6 +18,6 @@ void Airport::set_vpps(std::vector<int> lenght_)
 void Airport::get_vpps() const
 {
 	for (int i = 0; i < get_count_vpp(); i++)
-		std::cout << "VPP " << i << ": lenght " << vpps[i].get_lenght 
-		<< ", status " << (vpps[i].get_status()) ? "busy" : "free" << std::endl;
+		std::cout << "VPP " << i << ": lenght " << vpps[i].get_lenght() 
+		<< ", status " << vpps[i].get_status() << std::endl;
 }
