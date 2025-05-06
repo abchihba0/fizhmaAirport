@@ -1,10 +1,6 @@
 #include "Airport.h"
 #include<iostream>
 
-VPP::VPP(int lenght_) :lenght(lenght_), status(false)
-{
-}
-
 Airport::Airport() :vpp_count(0), plane_count(0),
 vpps({}), manager({})
 {
