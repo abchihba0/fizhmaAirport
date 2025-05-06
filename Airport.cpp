@@ -1,5 +1,9 @@
 #include "Airport.h"
 #include<iostream>
+#include <ctime>
+#include <chrono>  // для времени
+#include <thread>  // для sleep_for
+
 
 Airport::Airport() :vpp_count(0), plane_count(0),
 vpps({}), manager({})
@@ -22,30 +26,92 @@ void Airport::get_vpps() const
 		(vpps[i]->get_status() ? "false" : "free") << std::endl;
 }
 
-void Airport::set_manager(std::vector<int> types_)
-{
-	plane_count = types_.size();
-	manager = std::vector<Airplane*>(plane_count);
-
-	for (int i = 0; i < plane_count; i++) {
-		int airplaneType = types_[i];
-
-		switch (airplaneType) {
-		case 0: manager[i] = new CargoPlane(); break;
-		case 1: manager[i] = new PassengerPlane(); break;
-		case 2: manager[i] = new AgriculturePlane(); break;
-		case 3: manager[i] = new MilitaryPlane(); break;
-		case 4: manager[i] = new BusinessPlane(); break;
-		case 5: manager[i] = new RescuePlane(); break;
+Airplane* Airport::set_manager(){
+  
+	std::vector<Airplane*> typesOfPlanesToGenerate = { //массив, состоящий из всех наших типов
+	  new CargoPlane(),
+	  new PassengerPlane(),
+	  new AgriculturePlane(),
+	  new MilitaryPlane(),
+	  new BusinessPlane(),
+	  new RescuePlane()
+	};
+	
+	bool can_we_generate_this_type;//флажок, можем ли мы сгенерировать данный тип самолета
+	int count_of_generated_types = 6;//кол-во возможных типов самолета
+	int random_type;//случайный индекс типа самолета
+  
+	do {
+	  can_we_generate_this_type = false;
+	  random_type = rand() % count_of_generated_types;
+  
+	  for(auto vpp:vpps)//бегаем по дорожкам
+		if (vpp->get_lenght() >= typesOfPlanesToGenerate[random_type]->getVppLength()) {//если находится нужная
+		  can_we_generate_this_type = true;
+		  break;
 		}
-	}
-}
+  
+	  if (!can_we_generate_this_type)//если не находится, то присваиваем данному индексу тип самолета в конце вектора и уменьшаем колв-в
+		typesOfPlanesToGenerate[random_type] = typesOfPlanesToGenerate[--count_of_generated_types];
+  
+	} while (!can_we_generate_this_type&&count_of_generated_types!=0);
+  
+	if (can_we_generate_this_type)
+	  return typesOfPlanesToGenerate[random_type];
+	else
+	  return nullptr;
+  }
 
-void Airport::get_manager() const
+// основная задача: функцию game нужно доработать. В процессе processing'a запроса мы можем отправить
+// самолет на второй круг, в таком случае, у нас пойдет время, которое он будет на втором круге, хотя 
+// одновременно с этим другие запросы могут появляться. Пусть мы отправили самолет на второй круг и пошло
+// его время на втором круге и  допустим запросы появляются через n минут. ЗАПРОСЫ НЕ МОГУТ ПОЯВЛЯТЬСЯ ЧАЩЕ ЧЕМ
+// n МИНУТ, ПОЭТОМУ ЕСЛИ ЧЕРЕЗ ВРЕМЯ n ОСТАНЕТСЯ K < n МИНУТ ДО ПРИЛЕТА САМОЛЕТА С ДОП. КРУГА, ТО САМОЛЕТ СЕЙЧАС НЕ ГЕНЕРИРУЕТСЯ,
+// ВРЕМЯ МЕЖДУ ЗАПРОСАМИ БУДЕТ n+K минут. То есть не должно быть такого, что самолет сгенерировался, а потом через секунду прилетит самолет с доп круга. 
+
+void Airport::game(int ourLevel)
 {
-	for (int i = 0; i < plane_count; i++)
-		std::cout << "Plane number " << i
-		<< ": type " << manager[i]->getType()
-		<< ", VPP " << manager[i]->getVppLength()
-		<< std::endl;
+	srand(time(0));
+	double percentageOfCurrentLevelPassed = 0.0; // создаем переменную, в которую после обработки всех запросов запишется процент их прохождения
+	int countOfPassedRequests = 0;
+	for(int i = 0; i < countOfReQuestsOnTheLevel[ourLevel-1]; i++) {
+		Airplane *tempPlane = set_manager();
+		int result = processing(tempPlane);
+		if(result == 1) { countOfPassedRequests+=1;}
+		else {
+			manager.push_back(tempPlane);
+		}
+		// обработка запроса
+		// std::this_thread::sleep_for(std::chrono::milliseconds(5000)); // задержка между запросами в 5 секунд
+	}	
+
+}
+int Airport::processing(Airplane* tempPlane)
+{
+	std::cout << "Type of request Plane: " << tempPlane->getType() << std::endl;
+	std::cout << "busyness of vpp: " << std::endl;
+	for(int i = 0; i < vpp_count; i++) {
+		std::cout << "vpp number " << i+1 << " :" << "time busy: " << vpps[i]->getBusyTime() << ", length: " << vpps[i]->get_lenght() << std::endl;
+	}
+	int choice;
+	std::cin >> choice; // 0 - принимать запрос, -1 - отправить на второй круг
+	if(choice == 0) {
+		int tempVpp;
+		std::cin >> tempVpp;
+		while(vpps[tempVpp]->getBusyTime() != 0) {
+			std::cout << "You are stupid" << std::endl;
+		}
+		// тут должна быть привязка ко времени
+		vpps[tempVpp]->setBusyTime(tempPlane->getTime());
+		return 1;
+	}
+	else if(choice == -1) {
+		// пока что они не прилетают со второго круга=)
+		return -1;
+	}
+	else {
+		std::cout << "Fuck you nigga" << std::endl;
+		return 0;
+	}
+	
 }
