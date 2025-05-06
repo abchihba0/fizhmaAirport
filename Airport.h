@@ -37,3 +37,4 @@ public:
 	void set_manager(std::vector<int>types_);
 	void get_manager()const;
 };
+//
