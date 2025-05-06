@@ -1,5 +1,6 @@
 #include <iostream>
 #include "Airplane.cpp"
+#include "Airport.cpp"
 #include <cstdlib>
 #include <ctime>
 #include <vector>
@@ -29,7 +30,7 @@ int main() {
     for (int i = 0; i < 10; i++) {
         delete airplanes[i];
     }
-    // 	Airport port;
+    Airport port;
 	std::vector<int>lenghts(5, 10);
 	std::vector<int>types(6);
 	types = { 0, 1, 2, 3, 4, 5 };
