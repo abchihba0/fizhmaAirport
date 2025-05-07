@@ -15,7 +15,9 @@ int main() {
 	std::vector<int>types(6);
 	types = { 0, 1, 2, 3, 4, 5 };
 	port.set_vpps(lenghts);
-    port.game(1);
+    // port.game(1);
+
+	port.gameProcessing();
 	
 	return 0;
 }

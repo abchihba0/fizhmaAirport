@@ -86,7 +86,7 @@ void Airport::game(int ourLevel)
 	}	
 
 }
-int Airport::processing(Airplane* tempPlane)
+int Airport::processing(Airplane *tempPlane)
 {
 	std::cout << "Type of request Plane: " << tempPlane->getType() << std::endl;
 	std::cout << "busyness of vpp: " << std::endl;
@@ -98,11 +98,11 @@ int Airport::processing(Airplane* tempPlane)
 	if(choice == 0) {
 		int tempVpp;
 		std::cin >> tempVpp;
-		while(vpps[tempVpp]->getBusyTime() != 0) {
+		while(vpps[tempVpp+1]->getBusyTime() != 0) {
 			std::cout << "You are stupid" << std::endl;
 		}
 		// тут должна быть привязка ко времени
-		vpps[tempVpp]->setBusyTime(tempPlane->getTime());
+		vpps[tempVpp+1]->setBusyTime(tempPlane->getTime());
 		return 1;
 	}
 	else if(choice == -1) {
@@ -114,4 +114,12 @@ int Airport::processing(Airplane* tempPlane)
 		return 0;
 	}
 	
+}
+
+void Airport::gameProcessing()
+{
+	std::cout << "Which Level do you want to pass?" << std::endl;
+	int tempLvl;
+	std::cin >> tempLvl;
+	// if(this.)
 }
