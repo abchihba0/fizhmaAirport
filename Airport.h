@@ -7,8 +7,8 @@
 struct LevelProgress {
 	std::vector<VPP*>vpps; // массив из впп
 	std::vector<Airplane*>manager;
-	int countOfProcessedRequests; // количество обработанных запросов
-	int countOfCorrectProcessedRequests; // количество тех запросов, которые были обработанны корректно(то есть самолет был посажен или взлетел(те запросы, которые хранят самолеты на следующих кругах ни там ни там, они в доп массиве manager))
+	int countOfProcessedRequests = 0; // количество обработанных запросов
+	int countOfCorrectProcessedRequests = 0; // количество тех запросов, которые были обработанны корректно(то есть самолет был посажен или взлетел(те запросы, которые хранят самолеты на следующих кругах ни там ни там, они в доп массиве manager))
 	int PercetageOfPassing = 0;
 
 };
@@ -16,24 +16,18 @@ struct LevelProgress {
 class Airport {
 private:
 	int vpp_count;
-	int plane_count;
 	unsigned int currentLevel = 1; // изначально уровень равен 1
 	std::vector<VPP*>vpps; // массив из впп
 	std::vector<Airplane*>manager; // в этот массив будут добавляться запросы 
 	std::vector<int>countOfReQuestsOnTheLevel = {15, 20, 25, 30, 35}; // количество запросов на разных уровнях
-	// std::vector<LevelProgress> = std::vector<LevelProgress> // надо крч такой вектор чтобы можно было оттуда доставать прогресс уровня из структуры сразу, то есть по умолчанию все значения ноль и потом при выходе из игры прогрес перезаписывается
-	// std::vector<int>countOfProcessedRequests = {0,0,0,0,0}; // прогресс уровня (чтобы можно было продолжить уровень с запроса, на котором остановились)
+	const std::vector<int> runwaysPerLevel = {3, 5, 7, 7, 7}; // Количество полос для каждого уровня
+	std::vector<LevelProgress*>MemoryAboutLevelsProgress; // надо крч такой вектор чтобы можно было оттуда доставать прогресс уровня из структуры сразу, то есть по умолчанию все значения ноль и потом при выходе из игры прогрес перезаписывается
 	std::vector<double> percentageOfLevelPassed = std::vector<double>(5, 0.0);  // создаем вектор, который будет хранить процент прохожения уровня. Если процент больше условно 75, то можно переходить к следующему, уровень пройден, однако всегда можно вернуться и перепройти 
 public:
 
 	Airport();
 
-	void set_vpp_count(int count_) { vpp_count = count_; }
-	void set_plane_count(int count_) { plane_count = count_; }
-	void set_vpps(std::vector<int>lenghts_);
-
 	int get_vpp_count()const { return vpp_count; }
-	int get_plane_count()const { return plane_count; }
 	void get_vpps()const;	
 
 
@@ -42,4 +36,3 @@ public:
 	void game(int ourLevel);
 	void gameProcessing();
 };
-//
