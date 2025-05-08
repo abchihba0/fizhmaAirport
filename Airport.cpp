@@ -201,7 +201,7 @@ void Airport::gameProcessing()
 				// нужно доработать функцию game, чтобы она начинала с сохраненного результата
 			}
 			else if(answer == "S") {
-				// нужно доработать функцию game, чтобы она начинала с сохраненного результата
+				game(1);
 			}
 		}
 		else if(MemoryAboutLevelsProgress[0]->countOfProcessedRequests > 0 &&
@@ -209,6 +209,40 @@ void Airport::gameProcessing()
 			std::cout << "you have already completed this level before. Your result: "<< MemoryAboutLevelsProgress[0]->countOfCorrectProcessedRequests
 			 << " correct queries from : " << countOfReQuestsOnTheLevel[0] << ". do you want to replay the level(Y/n)? Your current result will be overwritten." << std::endl;
 		}
+		std::string answer;
+		cin >> answer;
+		if(answer == "Y" || answer == "y") {
+			game(1);
+		}
+		else if(answer == "N" || answer == "n"){
+			gameProcessing();
+		}
 	}
-	// if(MemoryAboutLevelsProgress[tempLvl-1])
+	else {
+		if(MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests > 0 &&
+			MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests < countOfReQuestsOnTheLevel[tempLvl-1] ) {
+				std::cout << "You have already started this level before, but did not finish it. Do you want to continue(C) or start over(S)? Your progress will be overwritten" << std::endl;
+				std::string answer;
+				cin >> answer;
+				if(answer == "C") {
+					// нужно доработать функцию game, чтобы она начинала с сохраненного результата
+				}
+				else if(answer == "S") {
+					game(1);
+				}
+			}
+			else if(MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests > 0 &&
+			MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests == countOfReQuestsOnTheLevel[tempLvl-1] ) {
+				std::cout << "you have already completed this level before. Your result: "<< MemoryAboutLevelsProgress[tempLvl-1]->countOfCorrectProcessedRequests
+				 << " correct queries from : " << countOfReQuestsOnTheLevel[tempLvl-1] << ". do you want to replay the level(Y/n)? Your current result will be overwritten." << std::endl;
+			}
+			std::string answer;
+			cin >> answer;
+			if(answer == "Y") {
+				game(tempLvl-1);
+			}
+			else {
+				gameProcessing();
+			}
+	}
 }
