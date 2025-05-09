@@ -183,7 +183,7 @@ int Airport::processing(Airplane *tempPlane, LevelProgress* ourLevel)
 }
 
 
-void Airport::gameProcessing(std::string point, int currentLevel)
+void Airport::gameProcessing(std::string point, int tempLvl)
 {	
     if(point == "Begin") {
         std::cout << "To accept the request, you need to press 0, then there will be a choice between different VPPS. \nTo send the plane on a next circle or ask it to wait for takeoff, you need to press -1." << std::endl;
@@ -218,7 +218,6 @@ void Airport::gameProcessing(std::string point, int currentLevel)
         }
 
         std::cout << "Which Level do you want to pass?" << std::endl;
-        int tempLvl;
         std::cin >> tempLvl;
 
         // Проверка корректности ввода уровня
@@ -249,8 +248,12 @@ void Airport::gameProcessing(std::string point, int currentLevel)
                     game(MemoryAboutLevelsProgress[tempLvl-1]);
                 }
                 else if(answer == "S") {
-                    MemoryAboutLevelsProgress[tempLvl-1] = new LevelProgress();
-                    MemoryAboutLevelsProgress[tempLvl-1]->Level = tempLvl;
+					for(int i = 0; i < MemoryAboutLevelsProgress[tempLvl-1]->vpp_count; i++) {
+						MemoryAboutLevelsProgress[tempLvl-1]->vpps[i]->setBusyTime(0);
+					}
+					MemoryAboutLevelsProgress[tempLvl-1]->manager.resize(0);
+					MemoryAboutLevelsProgress[tempLvl-1]->countOfCorrectProcessedRequests = 0;
+					MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests = 0;
                     game(MemoryAboutLevelsProgress[tempLvl-1]);
                 }
             }
@@ -262,8 +265,12 @@ void Airport::gameProcessing(std::string point, int currentLevel)
                 std::string answer;
                 std::cin >> answer;
                 if(answer == "Y" || answer == "y") {
-                    MemoryAboutLevelsProgress[tempLvl-1] = new LevelProgress();
-                    MemoryAboutLevelsProgress[tempLvl-1]->Level = tempLvl;
+                    for(int i = 0; i < MemoryAboutLevelsProgress[tempLvl-1]->vpp_count; i++) {
+						MemoryAboutLevelsProgress[tempLvl-1]->vpps[i]->setBusyTime(0);
+					}
+					MemoryAboutLevelsProgress[tempLvl-1]->manager.resize(0);
+					MemoryAboutLevelsProgress[tempLvl-1]->countOfCorrectProcessedRequests = 0;
+					MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests = 0;
                     game(MemoryAboutLevelsProgress[tempLvl-1]);
                 }
                 else {
@@ -276,36 +283,44 @@ void Airport::gameProcessing(std::string point, int currentLevel)
         }
     }
     else if(point == "LevelComplete") {
-        LevelProgress* completedLevel = MemoryAboutLevelsProgress[currentLevel-1];
+        LevelProgress* completedLevel = MemoryAboutLevelsProgress[tempLvl-1];
         int correct = completedLevel->countOfCorrectProcessedRequests;
-        int total = countOfReQuestsOnTheLevel[currentLevel-1];
+        int total = countOfReQuestsOnTheLevel[tempLvl-1];
         std::string answer;
         // если выполнено больше 75 процентов запросов и уровень не последний, то мы можем перейти на следующий уровень:
         if(correct > total/4*3) {
-            if(currentLevel != countOfReQuestsOnTheLevel.size()) { // сравниваем с размером количества запросов на уровне, то есть с количеством уровней
+            if(tempLvl != countOfReQuestsOnTheLevel.size()) { // сравниваем с размером количества запросов на уровне, то есть с количеством уровней
                 // эта часть если уровень не последний
                 std::cout << "Nice work! You have " << correct << "/" << total << " passed requests. You can go to the next level(n) or improve your result(i)." << std::endl;
                 std::cin >> answer;
                 if(answer == "n" || answer == "N") {
                     // Проверка прогресса на следующем уровне
-                    if(MemoryAboutLevelsProgress[currentLevel]->countOfProcessedRequests > 0) {
+                    if(MemoryAboutLevelsProgress[tempLvl]->countOfProcessedRequests > 0) {
                         std::cout << "Next level already has progress: " 
-                                  << MemoryAboutLevelsProgress[currentLevel]->countOfCorrectProcessedRequests 
-                                  << "/" << countOfReQuestsOnTheLevel[currentLevel] 
+                                  << MemoryAboutLevelsProgress[tempLvl]->countOfCorrectProcessedRequests 
+                                  << "/" << countOfReQuestsOnTheLevel[tempLvl] 
                                   << ". Are you sure you want to overwrite it? (Y/n)" << std::endl;
                         std::string overwriteAnswer;
                         std::cin >> overwriteAnswer;
                         if(overwriteAnswer == "Y" || overwriteAnswer == "y") {
-                            MemoryAboutLevelsProgress[currentLevel] = new LevelProgress();
-							MemoryAboutLevelsProgress[currentLevel-1]->Level = currentLevel;
+                            for(int i = 0; i < MemoryAboutLevelsProgress[tempLvl-1]->vpp_count; i++) {
+								MemoryAboutLevelsProgress[tempLvl-1]->vpps[i]->setBusyTime(0);
+							}
+							MemoryAboutLevelsProgress[tempLvl-1]->manager.resize(0);
+							MemoryAboutLevelsProgress[tempLvl-1]->countOfCorrectProcessedRequests = 0;
+							MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests = 0;
                         }
                     }
-                    game(MemoryAboutLevelsProgress[currentLevel]); // переходим на следующий уровень
+                    game(MemoryAboutLevelsProgress[tempLvl]); // переходим на следующий уровень
                 }
                 else if(answer == "I" || answer == "i") {
-                    MemoryAboutLevelsProgress[currentLevel-1] = new LevelProgress();
-					MemoryAboutLevelsProgress[currentLevel-1]->Level = currentLevel;
-                    game(MemoryAboutLevelsProgress[currentLevel-1]); // улучшаем наш результат
+                    for(int i = 0; i < MemoryAboutLevelsProgress[tempLvl-1]->vpp_count; i++) {
+						MemoryAboutLevelsProgress[tempLvl-1]->vpps[i]->setBusyTime(0);
+					}
+					MemoryAboutLevelsProgress[tempLvl-1]->manager.resize(0);
+					MemoryAboutLevelsProgress[tempLvl-1]->countOfCorrectProcessedRequests = 0;
+					MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests = 0;
+                    game(MemoryAboutLevelsProgress[tempLvl-1]); // улучшаем наш результат
                 }
             }
             else { // если последний уровень, то можно только улучшить результат
@@ -318,9 +333,13 @@ void Airport::gameProcessing(std::string point, int currentLevel)
                     std::cout << "Nice work! You have " << correct << "/" << total << " passed requests. You can improve the result. Will you go(Y/n)?" << std::endl;
                     std::cin >> answer;
                     if(answer == "Y" || answer == "y") {
-                        MemoryAboutLevelsProgress[currentLevel-1] = new LevelProgress();
-						MemoryAboutLevelsProgress[currentLevel-1]->Level = currentLevel;
-                        game(MemoryAboutLevelsProgress[currentLevel-1]);
+                        for(int i = 0; i < MemoryAboutLevelsProgress[tempLvl-1]->vpp_count; i++) {
+							MemoryAboutLevelsProgress[tempLvl-1]->vpps[i]->setBusyTime(0);
+						}
+						MemoryAboutLevelsProgress[tempLvl-1]->manager.resize(0);
+						MemoryAboutLevelsProgress[tempLvl-1]->countOfCorrectProcessedRequests = 0;
+						MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests = 0;
+                        game(MemoryAboutLevelsProgress[tempLvl-1]);
                     }
                     else {
                         gameProcessing("Begin", 0);
@@ -333,9 +352,13 @@ void Airport::gameProcessing(std::string point, int currentLevel)
             std::string answer;
             std::cin >> answer;
             if(answer == "Y" || answer == "y") {
-                MemoryAboutLevelsProgress[currentLevel-1] = new LevelProgress();
-                MemoryAboutLevelsProgress[currentLevel-1]->Level = currentLevel;
-                game(MemoryAboutLevelsProgress[currentLevel-1]);
+                for(int i = 0; i < MemoryAboutLevelsProgress[tempLvl-1]->vpp_count; i++) {
+					MemoryAboutLevelsProgress[tempLvl-1]->vpps[i]->setBusyTime(0);
+				}
+				MemoryAboutLevelsProgress[tempLvl-1]->manager.resize(0);
+				MemoryAboutLevelsProgress[tempLvl-1]->countOfCorrectProcessedRequests = 0;
+				MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests = 0;
+                game(MemoryAboutLevelsProgress[tempLvl-1]);
             }
             else {
                 gameProcessing("Begin", 0);
