@@ -22,5 +22,5 @@ class Airport {
 		Airplane* set_manager(LevelProgress* ourLevel);
 		int processing(Airplane* tempPlane, LevelProgress* ourLevel);
 		void game(LevelProgress* ourLevel);
-		void gameProcessing(std::string point,  int currentLevel);
+		void gameProcessing(std::string point,  int tempLvl);
 };
