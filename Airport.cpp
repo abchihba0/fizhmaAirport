@@ -159,26 +159,30 @@ int Airport::processing(Airplane *tempPlane, LevelProgress* ourLevel)
 	for(int i = 0; i < ourLevel->vpp_count; i++) {
 		std::cout << "vpp number " << i+1 << ": " << "time busy: " << ourLevel->vpps[i]->getBusyTime() << ", length: " << ourLevel->vpps[i]->get_lenght() << std::endl;
 	}
-	int choice;
-	std::cin >> choice; // 0 - принимать запрос, -1 - отправить на второй круг
-	if(choice == 0) {
-		int tempVpp;
-		std::cin >> tempVpp;
-		while(ourLevel->vpps[tempVpp-1]->getBusyTime() != 0) {
-			std::cout << "This vpp is busy. Please, choose another vpp" << std::endl;
+	int choice = 5;
+	while (choice != 0 || choice != -1 || choice != 2)
+	{
+		std::cin >> choice; // 0 - принимать запрос, -1 - отправить на второй круг
+
+		if(choice == 0) {
+			int tempVpp;
 			std::cin >> tempVpp;
+			while(ourLevel->vpps[tempVpp-1]->getBusyTime() != 0) {
+				std::cout << "This vpp is busy. Please, choose another vpp" << std::endl;
+				std::cin >> tempVpp;
+			}
+			// тут должна быть привязка ко времени
+			ourLevel->vpps[tempVpp-1]->setBusyTime(tempPlane->getTime());
+			return 1;
 		}
-		// тут должна быть привязка ко времени
-		ourLevel->vpps[tempVpp-1]->setBusyTime(tempPlane->getTime());
-		return 1;
-	}
-	else if(choice == -1) {
-		// пока что они не прилетают со второго круга=)
-		return -1;
-	}
-	else {
-		std::cout << "Wrong format" << std::endl;
-		return 0;
+		else if(choice == -1) {
+			// пока что они не прилетают со второго круга=)
+			return -1;
+		}
+		else {
+			std::cout << "Wrong format" << std::endl;
+			continue;
+		}	
 	}
 }
 
