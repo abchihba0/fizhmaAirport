@@ -3,23 +3,27 @@
 #include <ctime>
 #include <chrono>  // для времени
 #include <thread>  // для sleep_for
+#include <mutex>
+std::mutex cout_mutex;
 
 
-Airport::Airport() :vpp_count(0), plane_count(0),
+Airport::Airport(): vpp_count(0), plane_count(0),
 vpps({}), manager({})
 {
 }
 
-void Airport::set_vpps(std::vector<int> lenghts_)
+void Airport::set_vpps(std::vector<int> lengths_)
 {
-	vpp_count = lenghts_.size();
+	vpp_count = lengths_.size();
 	vpps = std::vector<VPP*>(vpp_count);
 	for (int i = 0; i < vpp_count; i++)
-		vpps[i] = new VPP(lenghts_[i]);
+		vpps[i] = new VPP(lengths_[i]);
 }
 
 void Airport::get_vpps() const
 {
+	std::unique_lock<std::mutex> lock(cout_mutex);
+	std::cout << "\n";
 	for (int i = 0; i < vpp_count; i++)
 		std::cout << "VPP " << i << ": lenght " <<
 		vpps[i]->get_lenght() << ", status " <<
@@ -75,6 +79,11 @@ void Airport::game(int ourLevel)
 	double percentageOfCurrentLevelPassed = 0.0; // создаем переменную, в которую после обработки всех запросов запишется процент их прохождения
 	int countOfPassedRequests = 0;
 	for(int i = 0; i < countOfReQuestsOnTheLevel[ourLevel-1]; i++) {
+		std::unique_lock<std::mutex> lock(cout_mutex);
+        // Перемещаем курсор на вторую строку и очищаем все ниже
+        std::cout << "\033[2;1H\033[J";
+        lock.unlock();
+
 		Airplane *tempPlane = set_manager();
 		int result = processing(tempPlane);
 		if(result == 1) { countOfPassedRequests+=1;}
@@ -83,26 +92,41 @@ void Airport::game(int ourLevel)
 		}
 		// обработка запроса
 		// std::this_thread::sleep_for(std::chrono::milliseconds(5000)); // задержка между запросами в 5 секунд
-	}	
+	}
+	// Очистка manager при завершении уровня
+    for (auto plane : manager) {
+        delete plane;
+    }
+    manager.clear();	
 
 }
+
 int Airport::processing(Airplane *tempPlane)
 {
-	std::cout << "Type of request Plane: " << tempPlane->getType() << std::endl;
+	std::unique_lock<std::mutex> lock(cout_mutex);
+    // Перемещаем курсор на вторую строку и очищаем все ниже
+    std::cout << "\033[2;1H\033[J";
+
+	std::cout << "Type of request Plane: " << tempPlane->getType() << " Max Circle: "
+  	<< tempPlane->getMaxCircle() << " Need Length: " << tempPlane->getVppLength() << std::endl;
 	std::cout << "busyness of vpp: " << std::endl;
+
 	for(int i = 0; i < vpp_count; i++) {
 		std::cout << "vpp number " << i+1 << " :" << "time busy: " << vpps[i]->getBusyTime() << ", length: " << vpps[i]->get_lenght() << std::endl;
 	}
+	lock.unlock();
+
 	int choice;
 	std::cin >> choice; // 0 - принимать запрос, -1 - отправить на второй круг
 	if(choice == 0) {
 		int tempVpp;
 		std::cin >> tempVpp;
-		while(vpps[tempVpp+1]->getBusyTime() != 0) {
-			std::cout << "You are stupid" << std::endl;
-		}
+		while(vpps[tempVpp-1]->getBusyTime() != 0) {
+			std::cout << "This vpp is busy. Please, choose another vpp" << std::endl;
+			std::cin >> tempVpp;
+		  }	  
 		// тут должна быть привязка ко времени
-		vpps[tempVpp+1]->setBusyTime(tempPlane->getTime());
+		vpps[tempVpp-1]->setBusyTime(tempPlane->getTime());
 		return 1;
 	}
 	else if(choice == -1) {
@@ -110,7 +134,7 @@ int Airport::processing(Airplane *tempPlane)
 		return -1;
 	}
 	else {
-		std::cout << "Fuck you nigga" << std::endl;
+		std::cout << "Wrong format" << std::endl;
 		return 0;
 	}
 	

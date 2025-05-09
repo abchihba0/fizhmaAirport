@@ -1,5 +1,5 @@
 #pragma once
-#include  <string>
+#include <string>
 
 class Airplane {
     public:
@@ -14,14 +14,14 @@ class Airplane {
 
 
 class CargoPlane : public Airplane {
-    public:
-        std::string getType() const override { return "CargoPlane"; }
-        int getMaxCircle() const override {return MAX_CIRCLES;}
-        int getVppLength() const override {return NEED_VPP_LENGTH;}
-        int getTime() const override {return REQUIRED_TIME;}
-        static const int MAX_CIRCLES = 10;  
-        static const int NEED_VPP_LENGTH = 4000;  // meters
-        static const int REQUIRED_TIME = 6;  //minutes
+public:
+    std::string getType() const override { return "CargoPlane"; }
+    int getMaxCircle() const override {return MAX_CIRCLES;}
+    int getVppLength() const override {return NEED_VPP_LENGTH;}
+    int getTime() const override {return REQUIRED_TIME;}
+    static const int MAX_CIRCLES = 10;  
+    static const int NEED_VPP_LENGTH = 4000;  // meters
+    static const int REQUIRED_TIME = 6;  //minutes
 };
 
 

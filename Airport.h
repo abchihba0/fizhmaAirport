@@ -2,6 +2,12 @@
 #include <vector>
 #include "Airplane.h"
 #include "VPP.h"
+
+// Для ANSI escape-кодов
+#define CLEAR_SCREEN "\033[2J\033[1;1H"
+#define MOVE_TO_LINE(n) "\033[" #n ";1H"
+#define CLEAR_BELOW "\033[J"
+
 // количество уровней нужно продумать, оно должно быть нам известно, в примере ниже уровней допустим будет 5
 // создаем структуру, которая будет хранить прогресс на уровне, то есть массив с занятостью vpps в данный момент, ОЧЕРЕДЬ manager из самолетов на следующих кругах 
 struct LevelProgress {
