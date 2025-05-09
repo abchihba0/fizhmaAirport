@@ -5,11 +5,12 @@
 // количество уровней нужно продумать, оно должно быть нам известно, в примере ниже уровней допустим будет 5
 // создаем структуру, которая будет хранить прогресс на уровне, то есть массив с занятостью vpps в данный момент, ОЧЕРЕДЬ manager из самолетов на следующих кругах 
 struct LevelProgress {
+	int Level = 1;
 	std::vector<VPP*>vpps; // массив из впп
 	std::vector<Airplane*>manager;
 	int countOfProcessedRequests = 0; // количество обработанных запросов
 	int countOfCorrectProcessedRequests = 0; // количество тех запросов, которые были обработанны корректно(то есть самолет был посажен или взлетел(те запросы, которые хранят самолеты на следующих кругах ни там ни там, они в доп массиве manager))
-	int PercetageOfPassing = 0;
+	int PercentageOfPassing = 0;
 
 };
 
@@ -33,6 +34,6 @@ public:
 
 	Airplane* set_manager();
 	int processing(Airplane* tempPlane);
-	void game(int ourLevel);
+	void game(LevelProgress* ourLevel);
 	void gameProcessing();
 };

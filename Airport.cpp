@@ -21,6 +21,7 @@ Airport::Airport() {
     // Инициализация MemoryAboutLevelsProgress
     for (int i = 0; i < 5; ++i) {
         MemoryAboutLevelsProgress.push_back(new LevelProgress());
+		MemoryAboutLevelsProgress[i]->Level = (i+1); // забиваем лвл в переменную каждому представителю LevelProgress
     }
 
     // Генерация полос для каждого уровня
@@ -137,23 +138,28 @@ Airplane* Airport::set_manager(){
 // n МИНУТ, ПОЭТОМУ ЕСЛИ ЧЕРЕЗ ВРЕМЯ n ОСТАНЕТСЯ K < n МИНУТ ДО ПРИЛЕТА САМОЛЕТА С ДОП. КРУГА, ТО САМОЛЕТ СЕЙЧАС НЕ ГЕНЕРИРУЕТСЯ,
 // ВРЕМЯ МЕЖДУ ЗАПРОСАМИ БУДЕТ n+K минут. То есть не должно быть такого, что самолет сгенерировался, а потом через секунду прилетит самолет с доп круга. 
 
-void Airport::game(int ourLevel)
+
+void Airport::game(LevelProgress* ourLevel)
 {
 	srand(time(0));
+	vpps = ourLevel->vpps;
+	vpp_count = ourLevel->vpps.size();
+	std::cout << "We have " << vpps.size() << " vpps on " << ourLevel->Level << " level" << std::endl;
 	double percentageOfCurrentLevelPassed = 0.0; // создаем переменную, в которую после обработки всех запросов запишется процент их прохождения
 	int countOfPassedRequests = 0;
-	for(int i = 0; i < countOfReQuestsOnTheLevel[ourLevel-1]; i++) {
+	for(int i = 0; i < countOfReQuestsOnTheLevel[ourLevel->Level-1] - ourLevel->countOfProcessedRequests; i++) { // количество запросов которые нужно обработать = количество запросов на уровне - количество уже обработанных запросов
 		Airplane *tempPlane = set_manager();
 		int result = processing(tempPlane);
 		if(result == 1) { countOfPassedRequests+=1;}
-		else {
+		else if(result == -1) {
 			manager.push_back(tempPlane);
 		}
 		// обработка запроса
 		// std::this_thread::sleep_for(std::chrono::milliseconds(5000)); // задержка между запросами в 5 секунд
 	}	
-
 }
+
+
 int Airport::processing(Airplane *tempPlane)
 {
 	std::cout << "Type of request Plane: " << tempPlane->getType() << " Max Circle: "
@@ -187,62 +193,77 @@ int Airport::processing(Airplane *tempPlane)
 }
 
 void Airport::gameProcessing()
-{
+{	
+	std::cout << "To accept the request, you need to press 0, then there will be a choice between different VPPS. \nTo send the plane on a next circle or ask it to wait for takeoff, you need to press -1." << std::endl;
 	std::cout << "Which Level do you want to pass?" << std::endl;
 	int tempLvl;
 	std::cin >> tempLvl;
 	if(tempLvl == 1) {
-		if(MemoryAboutLevelsProgress[0]->countOfProcessedRequests > 0 &&
-		MemoryAboutLevelsProgress[0]->countOfProcessedRequests < countOfReQuestsOnTheLevel[0] ) {
-			std::cout << "You have already started this level before, but did not finish it. Do you want to continue(C) or start over(S)? Your progress will be overwritten" << std::endl;
+		if(MemoryAboutLevelsProgress[0]->countOfProcessedRequests > 0) {
+			if(MemoryAboutLevelsProgress[0]->countOfProcessedRequests < countOfReQuestsOnTheLevel[0] ) {
+				std::cout << "You have already started this level before, but did not finish it. Do you want to continue(C) or start over(S)? Your progress will be overwritten" << std::endl;
+				std::string answer;
+				std::cin >> answer;
+				if(answer == "C") {
+					game(MemoryAboutLevelsProgress[0]);
+				}
+				else if(answer == "S") {
+					MemoryAboutLevelsProgress[tempLvl-1] = new LevelProgress();
+					MemoryAboutLevelsProgress[tempLvl-1]->Level = tempLvl;
+					game(MemoryAboutLevelsProgress[0]);
+				}
+			}
+			else if(MemoryAboutLevelsProgress[0]->countOfProcessedRequests == countOfReQuestsOnTheLevel[0] ) {
+				std::cout << "you have already completed this level before. Your result: "<< MemoryAboutLevelsProgress[0]->countOfCorrectProcessedRequests
+					<< " correct queries from : " << countOfReQuestsOnTheLevel[0] << ". do you want to replay the level(Y/n)? Your current result will be overwritten." << std::endl;
+			}
 			std::string answer;
-			cin >> answer;
-			if(answer == "C") {
-				// нужно доработать функцию game, чтобы она начинала с сохраненного результата
+			std::cin >> answer;
+			if(answer == "Y" || answer == "y") {
+				MemoryAboutLevelsProgress[tempLvl-1] = new LevelProgress();
+				MemoryAboutLevelsProgress[tempLvl-1]->Level = tempLvl;
+				game(MemoryAboutLevelsProgress[tempLvl-1]);
 			}
-			else if(answer == "S") {
-				game(1);
+			else if(answer == "N" || answer == "n"){
+				gameProcessing();
 			}
 		}
-		else if(MemoryAboutLevelsProgress[0]->countOfProcessedRequests > 0 &&
-		MemoryAboutLevelsProgress[0]->countOfProcessedRequests == countOfReQuestsOnTheLevel[0] ) {
-			std::cout << "you have already completed this level before. Your result: "<< MemoryAboutLevelsProgress[0]->countOfCorrectProcessedRequests
-			 << " correct queries from : " << countOfReQuestsOnTheLevel[0] << ". do you want to replay the level(Y/n)? Your current result will be overwritten." << std::endl;
-		}
-		std::string answer;
-		cin >> answer;
-		if(answer == "Y" || answer == "y") {
-			game(1);
-		}
-		else if(answer == "N" || answer == "n"){
-			gameProcessing();
+		else {
+			game(MemoryAboutLevelsProgress[0]);
 		}
 	}
 	else {
-		if(MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests > 0 &&
-			MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests < countOfReQuestsOnTheLevel[tempLvl-1] ) {
+		if(MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests > 0) {
+			if(MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests < countOfReQuestsOnTheLevel[tempLvl-1] ) {
 				std::cout << "You have already started this level before, but did not finish it. Do you want to continue(C) or start over(S)? Your progress will be overwritten" << std::endl;
 				std::string answer;
-				cin >> answer;
+				std::cin >> answer;
 				if(answer == "C") {
-					// нужно доработать функцию game, чтобы она начинала с сохраненного результата
+					game(MemoryAboutLevelsProgress[tempLvl-1]);
 				}
 				else if(answer == "S") {
-					game(1);
+					MemoryAboutLevelsProgress[tempLvl-1] = new LevelProgress();
+					MemoryAboutLevelsProgress[tempLvl-1]->Level = tempLvl;
+					game(MemoryAboutLevelsProgress[tempLvl-1]);
 				}
 			}
-			else if(MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests > 0 &&
-			MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests == countOfReQuestsOnTheLevel[tempLvl-1] ) {
+			else if(MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests == countOfReQuestsOnTheLevel[tempLvl-1] ) {
 				std::cout << "you have already completed this level before. Your result: "<< MemoryAboutLevelsProgress[tempLvl-1]->countOfCorrectProcessedRequests
-				 << " correct queries from : " << countOfReQuestsOnTheLevel[tempLvl-1] << ". do you want to replay the level(Y/n)? Your current result will be overwritten." << std::endl;
+					<< " correct queries from : " << countOfReQuestsOnTheLevel[tempLvl-1] << ". do you want to replay the level(Y/n)? Your current result will be overwritten." << std::endl;
 			}
 			std::string answer;
-			cin >> answer;
+			std::cin >> answer;
 			if(answer == "Y") {
-				game(tempLvl-1);
+				MemoryAboutLevelsProgress[tempLvl-1] = new LevelProgress();
+				MemoryAboutLevelsProgress[tempLvl-1]->Level = tempLvl;
+				game(MemoryAboutLevelsProgress[tempLvl-1]);
 			}
 			else {
 				gameProcessing();
 			}
+		}
+		else {
+			game(MemoryAboutLevelsProgress[tempLvl-1]);
+		}
 	}
 }
