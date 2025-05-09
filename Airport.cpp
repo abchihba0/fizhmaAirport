@@ -19,14 +19,14 @@ Airport::Airport() {
     };
 
     // Инициализация MemoryAboutLevelsProgress
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < countOfReQuestsOnTheLevel.size(); ++i) {
         MemoryAboutLevelsProgress.push_back(new LevelProgress());
 		MemoryAboutLevelsProgress[i]->Level = (i+1); // забиваем лвл в переменную каждому представителю LevelProgress
 		MemoryAboutLevelsProgress[i]->vpp_count = runwaysPerLevel[i]; // забиваем колво полос в переменную каждому представителю LevelProgress
     }
 
     // Генерация полос для каждого уровня
-    for (int level = 0; level < 5; ++level) {
+    for (int level = 0; level <  countOfReQuestsOnTheLevel.size(); ++level) {
         int runwaysNeeded = runwaysPerLevel[level];
         std::vector<int> lengths;
         std::vector<int> remainingLengths = requiredLengths; // Копируем все требуемые длины

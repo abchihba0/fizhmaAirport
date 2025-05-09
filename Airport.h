@@ -14,9 +14,7 @@ struct LevelProgress {
 };
 
 class Airport {
-	private:
-		unsigned int currentLevel = 1; // изначально уровень равен 1
-		std::vector<int>countOfReQuestsOnTheLevel = {15, 20, 25, 30, 35}; // количество запросов на разных уровнях
+	private:std::vector<int>countOfReQuestsOnTheLevel = {15, 20, 25, 30, 35}; // количество запросов на разных уровнях
 		const std::vector<int> runwaysPerLevel = {3, 5, 7, 7, 7}; // Количество полос для каждого уровня
 		std::vector<LevelProgress*>MemoryAboutLevelsProgress; // надо крч такой вектор чтобы можно было оттуда доставать прогресс уровня из структуры сразу, то есть по умолчанию все значения ноль и потом при выходе из игры прогрес перезаписывается
 	public:
