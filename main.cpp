@@ -14,7 +14,7 @@ int main() {
 	std::cout << "Are you ready to go(Y/n)?" << std::endl;
 	std::cin >> answer;
 	if(answer == "Y" || answer == "y") {
-		port.gameProcessing();
+		port.gameProcessing("Begin", 0); // begin отвечает за часть обработки уровня, перед или после. Нолик ни на что здесь не влияет, это тоже для окончания уровня
 
 	}
 	
