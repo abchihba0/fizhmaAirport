@@ -4,6 +4,7 @@
 #include <chrono>  // для времени
 #include <thread>  // для sleep_for
 #include <algorithm>
+#include <queue>
 
 
 
@@ -158,14 +159,14 @@ void Airport::game(LevelProgress* ourLevel)
 			// уменьшили
 			// когда уменьшили, смотрим, есть ли самолеты у которых время равно 0. Если есть, добавляем их в PlanesWhoFlewInFromTheCircle и далее обрабатываем
 			PlanesWhoFlewInFromTheCircle.resize(0);
-			while(ourLevel->manager.top()->getTime() == 0) {
+			while(ourLevel->manager.top()->getTime() == 0 && !ourLevel->manager.empty()) {
 				PlanesWhoFlewInFromTheCircle.push_back(ourLevel->manager.top());
 				ourLevel->manager.pop();
 			}
 			// добавили, теперь обрабатываем, если они есть
 			if(PlanesWhoFlewInFromTheCircle.size() != 0) {
-				std::cout << "We have " << PlanesWhoFlewInFromTheCircle.size() << " planes who flew in from the circle" << std::endl;
-				std::cout << "you must send it to the second round or accept it" << std::endl;
+				std::cout << std::endl << "We have " << PlanesWhoFlewInFromTheCircle.size() << " planes who flew in from the circle" << std::endl;
+				std::cout << "you must send it to the second round or accept it" << std::endl << std::endl;
 				for(int i = 0; i < PlanesWhoFlewInFromTheCircle.size(); i++) {
 					result = processing(PlanesWhoFlewInFromTheCircle[i], ourLevel);
 					if(result == 2) { 
@@ -280,12 +281,15 @@ int Airport::processing(Airplane *tempPlane, LevelProgress* ourLevel)
 				tempVpp = std::stoi(vppInput);
 			}
 			ourLevel->vpps[tempVpp-1]->setBusyTime(tempPlane->getRequiredTime());
+			std::cout << "Successful request processing" << std::endl;
 			return 1;
 		}
 		if(choice == -1) {
+			std::cout << "Sending the plane on a second circle..." << std::endl;
 			return -1;
 		}
 		else if(choice == 0) {
+			std::cout << "Skipping this request..." << std::endl;
 			return 0;
 		}
 		else {

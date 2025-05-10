@@ -9,9 +9,9 @@ class Airplane {
         virtual int getVppLength() const = 0;
         virtual int getRequiredTime() const = 0;
 
-        int getTime() {return timeOnTheCircle;}
-        int increaseCircle() {circle+=1;}
-        int setTime(int time) {timeOnTheCircle = time;}
+        int getTime()const {return timeOnTheCircle;}
+        void increaseCircle() {circle+=1;}
+        void setTime(int time) {timeOnTheCircle = time;}
     protected:
         int circle = 1;
         int timeOnTheCircle = 0;
