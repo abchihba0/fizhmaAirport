@@ -26,60 +26,59 @@ Airport::Airport() {
     }
 
     // Генерация полос для каждого уровня
-    for (int level = 0; level <  countOfReQuestsOnTheLevel.size(); ++level) {
-        int runwaysNeeded = runwaysPerLevel[level];
-        std::vector<int> lengths;
-        std::vector<int> remainingLengths = requiredLengths; // Копируем все требуемые длины
+    // Генерация полос для каждого уровня
+	for (int level = 0; level < countOfReQuestsOnTheLevel.size(); ++level) {
+		int runwaysNeeded = runwaysPerLevel[level];
+		std::vector<int> lengths;
+		std::vector<int> remainingLengths = requiredLengths;
+		
+		// Инициализация генератора случайных чисел
+		std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
-        // Генерация полос для текущего уровня
-        for (int i = 0; i < runwaysNeeded; ++i) {
-            bool canGenerateRunway = false;
-            int randomLength;
+		// Генерация полос для текущего уровня
+		for (int i = 0; i < runwaysNeeded; ++i) {
+			bool canGenerateRunway = false;
+			int randomLength;
 
-            do {
-                canGenerateRunway = false;
-                // Если остались неприкрытые типы самолётов, выбираем длину из оставшихся
-                if (!remainingLengths.empty()) {
-                    int randomIndex = rand() % remainingLengths.size();
-                    randomLength = remainingLengths[randomIndex] + (rand() % 5) * 100; // Добавляем случайный разброс
-                } else {
-                    // Все типы уже покрыты, генерируем любую допустимую длину
-                    int minLength = *std::min_element(requiredLengths.begin(), requiredLengths.end());
-                    randomLength = minLength + (rand() % 10) * 100;
-                }
+			do {
+				canGenerateRunway = false;
+				if (!remainingLengths.empty()) {
+					int randomIndex = std::rand() % remainingLengths.size();
+					randomLength = remainingLengths[randomIndex] + (std::rand() % 5) * 100;
+				} else {
+					int minLength = *std::min_element(requiredLengths.begin(), requiredLengths.end());
+					randomLength = minLength + (std::rand() % 10) * 100;
+				}
 
-                // Проверяем, что хотя бы один тип самолёта можно посадить на эту полосу
-                for (int len : requiredLengths) {
-                    if (randomLength >= len) {
-                        canGenerateRunway = true;
-                        break;
-                    }
-                }
+				for (int len : requiredLengths) {
+					if (randomLength >= len) {
+						canGenerateRunway = true;
+						break;
+					}
+				}
 
-                if (canGenerateRunway) {
-                    // Удаляем из remainingLengths длины, которые теперь покрыты этой полосой
-                    for (auto it = remainingLengths.begin(); it != remainingLengths.end(); ) {
-                        if (randomLength >= *it) {
-                            it = remainingLengths.erase(it);
-                        } else {
-                            ++it;
-                        }
-                    }
-                }
-            } while (!canGenerateRunway);
+				if (canGenerateRunway) {
+					for (auto it = remainingLengths.begin(); it != remainingLengths.end(); ) {
+						if (randomLength >= *it) {
+							it = remainingLengths.erase(it);
+						} else {
+							++it;
+						}
+					}
+				}
+			} while (!canGenerateRunway);
 
-            lengths.push_back(randomLength);
-            MemoryAboutLevelsProgress[level]->vpps.push_back(new VPP(randomLength));
-        }
+			lengths.push_back(randomLength);
+			MemoryAboutLevelsProgress[level]->vpps.push_back(new VPP(randomLength));
+		}
 
-        // Если это не первый уровень, копируем старые полосы и добавляем новые
-        if (level > 0) {
-            MemoryAboutLevelsProgress[level]->vpps = MemoryAboutLevelsProgress[level-1]->vpps;
-            for (int i = MemoryAboutLevelsProgress[level-1]->vpps.size(); i < runwaysNeeded; ++i) {
-                MemoryAboutLevelsProgress[level]->vpps.push_back(new VPP(lengths[i]));
-            }
-        }
-    }
+		if (level > 0) {
+			MemoryAboutLevelsProgress[level]->vpps = MemoryAboutLevelsProgress[level-1]->vpps;
+			for (int i = MemoryAboutLevelsProgress[level-1]->vpps.size(); i < runwaysNeeded; ++i) {
+				MemoryAboutLevelsProgress[level]->vpps.push_back(new VPP(lengths[i]));
+			}
+		}
+	}
 }
 
 
@@ -167,8 +166,14 @@ int Airport::processing(Airplane *tempPlane, LevelProgress* ourLevel)
 		if(choice == 0) {
 			int tempVpp;
 			std::cin >> tempVpp;
-			while(ourLevel->vpps[tempVpp-1]->getBusyTime() != 0) {
-				std::cout << "This vpp is busy. Please, choose another vpp" << std::endl;
+			while(ourLevel->vpps[tempVpp-1]->getBusyTime() != 0 || ourLevel->vpps[tempVpp-1]->get_lenght() < tempPlane->getVppLength()) {
+				if(ourLevel->vpps[tempVpp-1]->getBusyTime() != 0) {
+					std::cout << "This vpp is busy. Please, choose another vpp." << std::endl;
+				}
+				else {
+					std::cout << "Unfortunately, you cannot accept the aircraft on this runway because its length is not sufficient. Please, choose another vpp." << std::endl;
+
+				}
 				std::cin >> tempVpp;
 			}
 			// тут должна быть привязка ко времени
