@@ -4,6 +4,7 @@
 #include <chrono>  // для времени
 #include <thread>  // для sleep_for
 #include <algorithm>
+#include <queue>
 
 
 
@@ -19,86 +20,70 @@ Airport::Airport() {
     };
 
     // Инициализация MemoryAboutLevelsProgress
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < countOfReQuestsOnTheLevel.size(); ++i) {
         MemoryAboutLevelsProgress.push_back(new LevelProgress());
 		MemoryAboutLevelsProgress[i]->Level = (i+1); // забиваем лвл в переменную каждому представителю LevelProgress
+		MemoryAboutLevelsProgress[i]->vpp_count = runwaysPerLevel[i]; // забиваем колво полос в переменную каждому представителю LevelProgress
     }
 
     // Генерация полос для каждого уровня
-    for (int level = 0; level < 5; ++level) {
-        int runwaysNeeded = runwaysPerLevel[level];
-        std::vector<int> lengths;
-        std::vector<int> remainingLengths = requiredLengths; // Копируем все требуемые длины
+    // Генерация полос для каждого уровня
+	for (int level = 0; level < countOfReQuestsOnTheLevel.size(); ++level) {
+		int runwaysNeeded = runwaysPerLevel[level];
+		std::vector<int> lengths;
+		std::vector<int> remainingLengths = requiredLengths;
+		
+		// Инициализация генератора случайных чисел
+		std::srand(static_cast<unsigned int>(std::time(nullptr)));
 
-        // Генерация полос для текущего уровня
-        for (int i = 0; i < runwaysNeeded; ++i) {
-            bool canGenerateRunway = false;
-            int randomLength;
+		// Генерация полос для текущего уровня
+		for (int i = 0; i < runwaysNeeded; ++i) {
+			bool canGenerateRunway = false;
+			int randomLength;
 
-            do {
-                canGenerateRunway = false;
-                // Если остались неприкрытые типы самолётов, выбираем длину из оставшихся
-                if (!remainingLengths.empty()) {
-                    int randomIndex = rand() % remainingLengths.size();
-                    randomLength = remainingLengths[randomIndex] + (rand() % 5) * 100; // Добавляем случайный разброс
-                } else {
-                    // Все типы уже покрыты, генерируем любую допустимую длину
-                    int minLength = *std::min_element(requiredLengths.begin(), requiredLengths.end());
-                    randomLength = minLength + (rand() % 10) * 100;
-                }
+			do {
+				canGenerateRunway = false;
+				if (!remainingLengths.empty()) {
+					int randomIndex = std::rand() % remainingLengths.size();
+					randomLength = remainingLengths[randomIndex] + (std::rand() % 5) * 100;
+				} else {
+					int minLength = *std::min_element(requiredLengths.begin(), requiredLengths.end());
+					randomLength = minLength + (std::rand() % 10) * 100;
+				}
 
-                // Проверяем, что хотя бы один тип самолёта можно посадить на эту полосу
-                for (int len : requiredLengths) {
-                    if (randomLength >= len) {
-                        canGenerateRunway = true;
-                        break;
-                    }
-                }
+				for (int len : requiredLengths) {
+					if (randomLength >= len) {
+						canGenerateRunway = true;
+						break;
+					}
+				}
 
-                if (canGenerateRunway) {
-                    // Удаляем из remainingLengths длины, которые теперь покрыты этой полосой
-                    for (auto it = remainingLengths.begin(); it != remainingLengths.end(); ) {
-                        if (randomLength >= *it) {
-                            it = remainingLengths.erase(it);
-                        } else {
-                            ++it;
-                        }
-                    }
-                }
-            } while (!canGenerateRunway);
+				if (canGenerateRunway) {
+					for (auto it = remainingLengths.begin(); it != remainingLengths.end(); ) {
+						if (randomLength >= *it) {
+							it = remainingLengths.erase(it);
+						} else {
+							++it;
+						}
+					}
+				}
+			} while (!canGenerateRunway);
 
-            lengths.push_back(randomLength);
-            MemoryAboutLevelsProgress[level]->vpps.push_back(new VPP(randomLength));
-        }
+			lengths.push_back(randomLength);
+			MemoryAboutLevelsProgress[level]->vpps.push_back(new VPP(randomLength));
+		}
 
-        // Если это не первый уровень, копируем старые полосы и добавляем новые
-        if (level > 0) {
-            for (VPP* vpp : MemoryAboutLevelsProgress[level-1]->vpps) {
-                VPP* newVpp = new VPP(vpp->get_lenght());
-                MemoryAboutLevelsProgress[level]->vpps.push_back(newVpp);
-            }
-        }
-    }
-
-    // Инициализация текущих полос (для уровня 1 по умолчанию)
-    // Инициализация текущих полос
-    for (VPP* vpp : MemoryAboutLevelsProgress[0]->vpps) {
-        vpps.push_back(new VPP(vpp->get_lenght()));
-    }
-    vpp_count = vpps.size();
+		if (level > 0) {
+			MemoryAboutLevelsProgress[level]->vpps = MemoryAboutLevelsProgress[level-1]->vpps;
+			for (int i = MemoryAboutLevelsProgress[level-1]->vpps.size(); i < runwaysNeeded; ++i) {
+				MemoryAboutLevelsProgress[level]->vpps.push_back(new VPP(lengths[i]));
+			}
+		}
+	}
 }
 
 
-
-void Airport::get_vpps() const
-{
-	for (int i = 0; i < vpp_count; i++)
-		std::cout << "VPP " << i << ": lenght " <<
-		vpps[i]->get_lenght() << ", status " <<
-		(vpps[i]->get_status() ? "false" : "free") << std::endl;
-}
-
-Airplane* Airport::set_manager(){
+Airplane* Airport::set_manager(LevelProgress* ourLevel){
   
 	std::vector<Airplane*> typesOfPlanesToGenerate = { //массив, состоящий из всех наших типов
 	  new CargoPlane(),
@@ -117,12 +102,14 @@ Airplane* Airport::set_manager(){
 	  can_we_generate_this_type = false;
 	  random_type = rand() % count_of_generated_types;
   
-	  for(auto vpp:vpps)//бегаем по дорожкам
-		if (vpp->get_lenght() >= typesOfPlanesToGenerate[random_type]->getVppLength()) {//если находится нужная
-		  can_we_generate_this_type = true;
-		  break;
+		for(auto vpp : ourLevel->vpps) {//бегаем по дорожкам 
+			if (vpp->get_lenght() >= typesOfPlanesToGenerate[random_type]->getVppLength()) {//если находится нужная
+				if(vpp->getBusyTime() < typesOfPlanesToGenerate[random_type]->getRequiredTime()*typesOfPlanesToGenerate[random_type]->getMaxCircle()) {
+					can_we_generate_this_type = true;
+					break;
+				}
+			}
 		}
-  
 	  if (!can_we_generate_this_type)//если не находится, то присваиваем данному индексу тип самолета в конце вектора и уменьшаем колв-в
 		typesOfPlanesToGenerate[random_type] = typesOfPlanesToGenerate[--count_of_generated_types];
   
@@ -141,105 +128,331 @@ Airplane* Airport::set_manager(){
 // n МИНУТ, ПОЭТОМУ ЕСЛИ ЧЕРЕЗ ВРЕМЯ n ОСТАНЕТСЯ K < n МИНУТ ДО ПРИЛЕТА САМОЛЕТА С ДОП. КРУГА, ТО САМОЛЕТ СЕЙЧАС НЕ ГЕНЕРИРУЕТСЯ,
 // ВРЕМЯ МЕЖДУ ЗАПРОСАМИ БУДЕТ n+K минут. То есть не должно быть такого, что самолет сгенерировался, а потом через секунду прилетит самолет с доп круга. 
 
-void Airport::saveProgress(LevelProgress* level) {
-    level->countOfProcessedRequests = countOfReQuestsOnTheLevel[level->Level-1] - manager.size();
-    level->countOfCorrectProcessedRequests = 0;
-    level->vpps = vpps;
-    level->manager = manager;
-}
-
-// void Airport::handleExit() {
-//     if (currentLevelProgress != nullptr) {
-//         saveProgress(currentLevelProgress);
-//     }
-//     shouldExit = true;
-// }
-
-// bool Airport::checkForExitCommand(int input) {
-//     if (input == 2) {
-//         handleExit();
-//         return true;
-//     }
-//     return false;
-// }
 
 void Airport::game(LevelProgress* ourLevel)
 {
 	srand(time(0));
-	vpps = ourLevel->vpps;
-	vpp_count = ourLevel->vpps.size();
-	std::cout << "You have " << vpps.size() << " vpps on " << ourLevel->Level << " level" << std::endl;
+	std::cout << "You have " << ourLevel->vpp_count << " vpps on " << ourLevel->Level << " level" << std::endl;
 	double percentageOfCurrentLevelPassed = 0.0; // создаем переменную, в которую после обработки всех запросов запишется процент их прохождения
-	int countOfPassedRequests = 0;
-	for(int i = 0; i < countOfReQuestsOnTheLevel[ourLevel->Level-1] - ourLevel->countOfProcessedRequests; i++) { // количество запросов которые нужно обработать = количество запросов на уровне - количество уже обработанных запросов
-		Airplane *tempPlane = set_manager();
-		int result = processing(tempPlane);
-		if(result == 2) { 
-            saveProgress(ourLevel);
-            std::cout << "Progress saved. Returning to level selection..." << std::endl;
-            return;
+	// колво правильных запросов равно количеству корректных запросов их сохраненного результата
+	int requests=ourLevel->countOfProcessedRequests;
+	std::vector<Airplane*> tempmanager; // вектор для временного хранения самолетов с кругами, уменьшенными на 1, для изменения manager
+	int result;
+	std::vector<Airplane*> PlanesWhoFlewInFromTheCircle; // вектор с прилетевшими с круга самолётами, запросы которых нужно обработать
+	std::vector<Airplane*> PlanesWhoWantToFly; // вектор с самолётами, у которых вторичный запрос на взлёт
+	for(int i = 0; i < countOfReQuestsOnTheLevel[ourLevel->Level-1] - requests; i++) { // количество запросов которые нужно обработать = количество запросов на уровне - количество уже обработанных запросов
+		for (auto vpp : ourLevel->vpps) { // уменьшаем занятость полос
+            if (vpp->getBusyTime() > 0) {
+                vpp->setBusyTime(vpp->getBusyTime() - 1);
+            }
         }
-		else if(result == 1) { countOfPassedRequests+=1;}
-		else if(result == -1) {
-			manager.push_back(tempPlane);
-		}
-		// обработка запроса
-		// std::this_thread::sleep_for(std::chrono::milliseconds(5000)); // задержка между запросами в 5 секунд
-	}	
-	saveProgress(ourLevel);
-}
-
-
-int Airport::processing(Airplane *tempPlane)
-{
-	std::cout << "Type of request Plane: " << tempPlane->getType() << " Max Circle: "
-	<< tempPlane->getMaxCircle() << " Need Length: " << tempPlane->getVppLength() << std::endl;
-	std::cout << "busyness of vpp: " << std::endl;
-	for(int i = 0; i < vpp_count; i++) {
-		std::cout << "vpp number " << i+1 << ": " << "time busy: " << vpps[i]->getBusyTime() << ", length: " << vpps[i]->get_lenght() << std::endl;
-	}
-	std::string input;
-	std::cin >> input; // 0 - принимать запрос, -1 - отправить на второй круг
-	if (input == "exit") {
-        return 2; 
-    }
-	int choice=std::stoi(input);
-	if(choice == 0) {
-		std::string vppInput;
-		std::cin >> vppInput;
-		if (vppInput == "exit") {
-			return 2;
-		}
-		int tempVpp = std::stoi(vppInput);
-		while(vpps[tempVpp-1]->getBusyTime() != 0) {
-			std::cout << "This vpp is busy, Please, choose another vpp" << std::endl;
-			std::string vppInput;
-			std::cin >> vppInput;
-			if (vppInput == "exit") {
-				return 2;
+		if(!ourLevel->managerLanding.empty()) {
+			// уменьшение времени на некст круге
+			while(!ourLevel->managerLanding.empty()) {
+				tempmanager.push_back(ourLevel->managerLanding.top());
+				tempmanager.back()->setTime(tempmanager.back()->getTime()-1);
+				ourLevel->managerLanding.pop();
 			}
-			int tempVpp = std::stoi(vppInput);
+			for(auto plane : tempmanager) {
+				ourLevel->managerLanding.push(plane);
+			} 
+			tempmanager.resize(0);
+			// уменьшили
+			// когда уменьшили, смотрим, есть ли самолеты у которых время равно 0. Если есть, добавляем их в PlanesWhoFlewInFromTheCircle и далее обрабатываем
+			PlanesWhoFlewInFromTheCircle.resize(0);
+			while(ourLevel->managerLanding.top()->getTime() == 0 && !ourLevel->managerLanding.empty()) {
+				PlanesWhoFlewInFromTheCircle.push_back(ourLevel->managerLanding.top());
+				ourLevel->managerLanding.pop();
+			}
+			// добавили, теперь обрабатываем, если они есть
+			if(PlanesWhoFlewInFromTheCircle.size() != 0) {
+				std::cout << std::endl << "We have " << PlanesWhoFlewInFromTheCircle.size() << " planes who flew in from the circle" << std::endl;
+				std::cout << "you must send it to the second round or accept it" << std::endl << std::endl;
+				for(int i = 0; i < PlanesWhoFlewInFromTheCircle.size(); i++) {
+					result = processing(PlanesWhoFlewInFromTheCircle[i], ourLevel);
+					if(result == 2) { 
+						std::cout << "Progress saved. Returning to level selection..." << std::endl;
+						return gameProcessing("Begin", ourLevel->Level);;
+					}
+					else if(result == 1) { 
+						ourLevel->countOfCorrectProcessedRequests+=1;
+						ourLevel->countOfProcessedRequests+=1;
+					}
+					else if(result == -1) { 
+						if (PlanesWhoFlewInFromTheCircle[i]->getCircle() == PlanesWhoFlewInFromTheCircle[i]->getMaxCircle()) {
+							std::cout << "It was the last circle" << std::endl;
+						}
+						else {
+							PlanesWhoFlewInFromTheCircle[i]->increaseCircle();
+							PlanesWhoFlewInFromTheCircle[i]->setTime(PlanesWhoFlewInFromTheCircle[i]->getRequiredTime());
+							ourLevel->managerLanding.push(PlanesWhoFlewInFromTheCircle[i]);
+						}
+					}
+					else if(result == -2) { 
+						if (PlanesWhoWantToFly[i]->getCircle() == PlanesWhoWantToFly[i]->getMaxCircle()) {
+							std::cout << "It was the last circle" << std::endl;
+						}
+						else {
+							PlanesWhoWantToFly[i]->increaseCircle();
+							PlanesWhoWantToFly[i]->setTime(PlanesWhoWantToFly[i]->getRequiredTime());
+							ourLevel->managerRise.push(PlanesWhoWantToFly[i]);
+						}
+					}
+					else if(result == 0) {
+						ourLevel->countOfProcessedRequests += 1;
+					}
+						
+					// обработка запроса
+					// std::this_thread::sleep_for(std::chrono::milliseconds(5000)); // задержка между запросами в 5 секунд
+					// ourLevel->countOfProcessedRequests += 1; // Увеличиваем счетчик обработанных запросов
+				}
+				i--;
+			}
+			else {
+				Airplane *tempPlane = set_manager(ourLevel);
+				result = processing(tempPlane, ourLevel);
+				if(result == 2) { 
+					std::cout << "Progress saved. Returning to level selection..." << std::endl;
+					return gameProcessing("Begin", ourLevel->Level);;
+				}
+				else if(result == 1) { 
+					ourLevel->countOfCorrectProcessedRequests+=1;
+					ourLevel->countOfProcessedRequests+=1;
+				}
+				else if(result == -1) { 
+					tempPlane->increaseCircle();
+					tempPlane->setTime(tempPlane->getRequiredTime());
+					ourLevel->managerLanding.push(tempPlane);
+				}
+				else if(result == -2) { 
+					tempPlane->increaseCircle();
+					tempPlane->setTime(tempPlane->getRequiredTime());
+					ourLevel->managerRise.push(tempPlane);
+				}
+				else if(result == 0) {
+					ourLevel->countOfProcessedRequests += 1;
+				}
+			}
 		}
-		// тут должна быть привязка ко времени
-		vpps[tempVpp-1]->setBusyTime(tempPlane->getTime());
-		return 1;
-	}
-	else if(choice == -1) {
-		// пока что они не прилетают со второго круга=)
-		return -1;
-	}
-	else {
-		std::cout << "Wrong format" << std::endl;
-		return 0;
+		if(!ourLevel->managerRise.empty()) {
+			// уменьшение времени на некст круге
+			while(!ourLevel->managerRise.empty()) {
+				tempmanager.push_back(ourLevel->managerRise.top());
+				tempmanager.back()->setTime(tempmanager.back()->getTime()-1);
+				ourLevel->managerRise.pop();
+			}
+			for(auto plane : tempmanager) {
+				ourLevel->managerRise.push(plane);
+			} 
+			tempmanager.resize(0);
+			// уменьшили
+			// когда уменьшили, смотрим, есть ли самолеты у которых время равно 0. Если есть, добавляем их в PlanesWhoFlewInFromTheCircle и далее обрабатываем
+			PlanesWhoWantToFly.resize(0);
+			while(ourLevel->managerRise.top()->getTime() == 0 && !ourLevel->managerRise.empty()) {
+				PlanesWhoWantToFly.push_back(ourLevel->managerRise.top());
+				ourLevel->managerRise.pop();
+			}
+			// добавили, теперь обрабатываем, если они есть
+			if(PlanesWhoWantToFly.size() != 0) {
+				std::cout << std::endl << "We have " << PlanesWhoWantToFly.size() << " planes that want to take off" << std::endl;
+				std::cout << "you must send it to the second round or accept it" << std::endl << std::endl;
+				for(int i = 0; i < PlanesWhoWantToFly.size(); i++) {
+					result = processing(PlanesWhoWantToFly[i], ourLevel);
+					if(result == 2) { 
+						std::cout << "Progress saved. Returning to level selection..." << std::endl;
+						return gameProcessing("Begin", ourLevel->Level);;
+					}
+					else if(result == 1) { 
+						ourLevel->countOfCorrectProcessedRequests+=1;
+						ourLevel->countOfProcessedRequests+=1;
+					}
+					else if(result == -1) { 
+						if (PlanesWhoFlewInFromTheCircle[i]->getCircle() == PlanesWhoFlewInFromTheCircle[i]->getMaxCircle()) {
+							std::cout << "It was the last circle" << std::endl;
+						}
+						else {
+							PlanesWhoFlewInFromTheCircle[i]->increaseCircle();
+							PlanesWhoFlewInFromTheCircle[i]->setTime(PlanesWhoFlewInFromTheCircle[i]->getRequiredTime());
+							ourLevel->managerLanding.push(PlanesWhoFlewInFromTheCircle[i]);
+						}
+					}
+					else if(result == -2) { 
+						if (PlanesWhoWantToFly[i]->getCircle() == PlanesWhoWantToFly[i]->getMaxCircle()) {
+							std::cout << "It was the last circle" << std::endl;
+						}
+						else {
+							PlanesWhoWantToFly[i]->increaseCircle();
+							PlanesWhoWantToFly[i]->setTime(PlanesWhoWantToFly[i]->getRequiredTime());
+							ourLevel->managerRise.push(PlanesWhoWantToFly[i]);
+						}
+					}
+					else if(result == 0) {
+						ourLevel->countOfProcessedRequests += 1;
+					}
+				}
+				i--;
+			}
+			else {
+				Airplane *tempPlane = set_manager(ourLevel);
+				result = processing(tempPlane, ourLevel);
+				if(result == 2) { 
+					std::cout << "Progress saved. Returning to level selection..." << std::endl;
+					return gameProcessing("Begin", ourLevel->Level);;
+				}
+				else if(result == 1) { 
+					ourLevel->countOfCorrectProcessedRequests+=1;
+					ourLevel->countOfProcessedRequests+=1;
+				}
+				else if(result == -1) { 
+					tempPlane->increaseCircle();
+					tempPlane->setTime(tempPlane->getRequiredTime());
+					ourLevel->managerLanding.push(tempPlane);
+				}
+				else if(result == -2) { 
+					tempPlane->increaseCircle();
+					tempPlane->setTime(tempPlane->getRequiredTime());
+					ourLevel->managerRise.push(tempPlane);
+				}
+				else if(result == 0) {
+					ourLevel->countOfProcessedRequests += 1;
+				}
+			}
+		}
+		else {
+			Airplane *tempPlane = set_manager(ourLevel);
+			result = processing(tempPlane, ourLevel);
+	
+			if(result == 2) { 
+				std::cout << "Progress saved. Returning to level selection..." << std::endl;
+				return gameProcessing("Begin", ourLevel->Level);;
+			}
+			else if(result == 1) { 
+				ourLevel->countOfCorrectProcessedRequests+=1;
+				ourLevel->countOfProcessedRequests+=1;
+			}
+			else if(result == -1) { 
+				tempPlane->increaseCircle();
+				tempPlane->setTime(tempPlane->getRequiredTime());
+				ourLevel->managerLanding.push(tempPlane); 
+			}
+			else if(result == -2) { 
+				tempPlane->increaseCircle();
+				tempPlane->setTime(tempPlane->getRequiredTime());
+				ourLevel->managerRise.push(tempPlane);
+			}
+			else if(result == 0) {
+				ourLevel->countOfProcessedRequests += 1;
+			}
+			// обработка запроса
+			// std::this_thread::sleep_for(std::chrono::milliseconds(5000)); // задержка между запросами в 5 секунд
+			// ourLevel->countOfProcessedRequests += 1; // Увеличиваем счетчик обработанных запросов
+		}
 	}
 	
+	// Перенаправляем в gameProcessing для обработки завершения уровня
+	gameProcessing("LevelComplete", ourLevel->Level);
 }
 
-void Airport::gameProcessing()
+
+int Airport::processing(Airplane *tempPlane, LevelProgress* ourLevel)
 {
-	while (true)
+	int typeOfRequest = rand() % 2;
+	std::cout << "Type of request Plane: " << tempPlane->getType() << "  Request type: " << ((typeOfRequest==0) ? "landing " : "takeoff ") << " Max Circle: "
+	<< tempPlane->getMaxCircle() << "  Need Length: " << tempPlane->getVppLength() << "  Time for next circle: " << tempPlane->getRequiredTime() << "  Current circle: " << tempPlane->getCircle() << std::endl;
+	std::cout << "busyness of vpp: " << std::endl;
+	for(int i = 0; i < ourLevel->vpp_count; i++) {
+		std::cout << "vpp number " << i+1 << ": " << "time busy: " << ourLevel->vpps[i]->getBusyTime() << ", length: " << ourLevel->vpps[i]->get_lenght() << std::endl;
+	}
+	int choice = 1000;
+	std::string input;
+	int tempVpp;
+	std::string vppInput;
+	while (choice != -1 && choice != 0 && (choice < 1 || choice > ourLevel->vpp_count))
 	{
-		std::cout << "To accept the request, you need to press 0, then there will be a choice between different VPPS. \nTo send the plane on a next circle or ask it to wait for takeoff, you need to press -1." << std::endl;
+		std::cin >> input; 
+		if (input == "exit") {
+			return 2; 
+		}
+		choice = std::stoi(input);
+
+		if(choice > 0 && choice <= ourLevel->vpp_count) {
+			tempVpp = choice;
+			while(ourLevel->vpps[tempVpp-1]->getBusyTime() != 0 || ourLevel->vpps[tempVpp-1]->get_lenght() < tempPlane->getVppLength()) {
+				if(ourLevel->vpps[tempVpp-1]->getBusyTime() != 0) {
+					std::cout << "This vpp is busy. Please, choose another vpp." << std::endl;
+				}
+				else {
+					std::cout << "Unfortunately, you cannot accept the aircraft on this runway because its length is not sufficient. Please, choose another vpp." << std::endl;
+
+				}
+				std::cin >> vppInput;
+				if (vppInput == "exit") {
+					return 2;
+				}
+				tempVpp = std::stoi(vppInput);
+			}
+			ourLevel->vpps[tempVpp-1]->setBusyTime(tempPlane->getRequiredTime());
+			std::cout << "Successful request processing" << std::endl;
+			return 1;
+		}
+		else if(choice == -1 && typeOfRequest == 0) {
+			if (!(tempPlane->getCircle()==tempPlane->getMaxCircle())) {
+				std::cout << "Sending the plane on a second circle..." << std::endl;
+			}
+			return -1;
+		}
+		else if(choice == -1 && typeOfRequest == 1) {
+			if (!(tempPlane->getCircle()==tempPlane->getMaxCircle())) {
+				std::cout << "Sending the plane on a second circle..." << std::endl;
+			}
+			return -2;
+		}
+		else if(choice == 0) {
+			std::cout << "Skipping this request..." << std::endl;
+			return 0;
+		}
+		else {
+			std::cout << "Wrong format." << std::endl;
+			continue;
+		}
+	}
+}
+
+
+void Airport::gameProcessing(std::string point, int tempLvl)
+{	
+	if(point == "Begin") {
+		std::cout << "To accept the request, you need to press the number of vpp. \nThe request will be skipped when the timer expires \nTo send the plane on a next circle or ask it to wait for takeoff, you need to press -1." << std::endl;
+		
+		// Вывод всех доступных уровней с прогрессом
+		std::cout << "Available levels:" << std::endl;
+		for(int i = 0; i < countOfReQuestsOnTheLevel.size(); ++i) {
+			std::cout << "Level " << (i+1) << " - ";
+			if(MemoryAboutLevelsProgress[i]->countOfProcessedRequests > 0) {
+				std::cout << "Progress: " << MemoryAboutLevelsProgress[i]->countOfCorrectProcessedRequests 
+						<< "/" << countOfReQuestsOnTheLevel[i];
+				if(i > 0) {
+					double prevProgress = (double)MemoryAboutLevelsProgress[i-1]->countOfCorrectProcessedRequests / 
+										countOfReQuestsOnTheLevel[i-1];
+					if(prevProgress < 0.75) {
+						std::cout << " (Locked - complete 75% of previous level)";
+					}
+				}
+				std::cout << std::endl;
+			}
+			else {
+				if(i > 0) {
+					double prevProgress = (double)MemoryAboutLevelsProgress[i-1]->countOfCorrectProcessedRequests / 
+										countOfReQuestsOnTheLevel[i-1];
+					if(prevProgress < 0.75) {
+						std::cout << "Locked - complete 75% of level " << i << std::endl;
+						continue;
+					}
+				}
+				std::cout << "Not started" << std::endl;
+			}
+		}
+
 		std::cout << "Which Level do you want to pass?" << std::endl;
 		std::string input;
 		std::cin >> input;
@@ -248,86 +461,172 @@ void Airport::gameProcessing()
 			return;
 		}
 		int tempLvl=std::stoi(input);
-		if(tempLvl == 1) {
-			if(MemoryAboutLevelsProgress[0]->countOfProcessedRequests > 0) {
-				if(MemoryAboutLevelsProgress[0]->countOfProcessedRequests < countOfReQuestsOnTheLevel[0] ) {
-					std::cout << "You have already started this level before, but did not finish it. Do you want to continue(C) or start over(S)? Your progress will be overwritten" << std::endl;
-					std::string answer;
-					std::cin >> answer;
-					if(answer == "C") {
-						game(MemoryAboutLevelsProgress[0]);
-					}
-					else if(answer == "S") {
-						MemoryAboutLevelsProgress[tempLvl-1] = new LevelProgress();
-						MemoryAboutLevelsProgress[tempLvl-1]->Level = tempLvl;
-						game(MemoryAboutLevelsProgress[0]);
-					}
-					else if(answer == "exit") {
-						continue;
-					}
+
+		// Проверка корректности ввода уровня
+		if(tempLvl < 1 || tempLvl > countOfReQuestsOnTheLevel.size()) {
+			std::cout << "Invalid level number! Please enter a number between 1 and " << countOfReQuestsOnTheLevel.size() << "." << std::endl;
+			return gameProcessing("Begin", 0);
+		}
+
+		// Проверка доступа к уровню (только если выбран не первый уровень)
+		if(tempLvl > 1) {
+			LevelProgress* prevLevel = MemoryAboutLevelsProgress[tempLvl-2];
+			double progress = (double)prevLevel->countOfCorrectProcessedRequests / 
+							countOfReQuestsOnTheLevel[tempLvl-2];
+			
+			if(progress < 0.75) {
+				std::cout << "You need to complete at least 75% of level " << (tempLvl-1) << " before accessing this level!" << std::endl;
+				return gameProcessing("Begin", 0);
+			}
+		}
+
+		// Проверка существующего прогресса на выбранном уровне
+		if(MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests > 0) {
+			if(MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests < countOfReQuestsOnTheLevel[tempLvl-1]) {
+				std::cout << "You have already started this level before, but did not finish it. Do you want to continue(C) or start over(S)? Your progress will be overwritten" << std::endl;
+				std::string answer;
+				std::cin >> answer;
+				if(answer == "C" || answer == "c") {
+					game(MemoryAboutLevelsProgress[tempLvl-1]);
 				}
-				else if(MemoryAboutLevelsProgress[0]->countOfProcessedRequests == countOfReQuestsOnTheLevel[0] ) {
-					std::cout << "you have already completed this level before. Your result: "<< MemoryAboutLevelsProgress[0]->countOfCorrectProcessedRequests
-						<< " correct queries from : " << countOfReQuestsOnTheLevel[0] << ". do you want to replay the level(Y/n)? Your current result will be overwritten." << std::endl;
+				else if(answer == "S" || answer == "s") {
+					for(int i = 0; i < MemoryAboutLevelsProgress[tempLvl-1]->vpp_count; i++) {
+						MemoryAboutLevelsProgress[tempLvl-1]->vpps[i]->setBusyTime(0);
+					}
+					while(!MemoryAboutLevelsProgress[tempLvl-1]->managerLanding.empty()) {
+						MemoryAboutLevelsProgress[tempLvl-1]->managerLanding.pop();
+					}
+					MemoryAboutLevelsProgress[tempLvl-1]->countOfCorrectProcessedRequests = 0;
+					MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests = 0;
+					game(MemoryAboutLevelsProgress[tempLvl-1]);
 				}
+				else if(answer == "exit") {
+					return gameProcessing("Begin", 0);
+				}
+			}
+			else {
+				std::cout << "You have already completed this level before. Your result: " 
+						<< MemoryAboutLevelsProgress[tempLvl-1]->countOfCorrectProcessedRequests
+						<< "/" << countOfReQuestsOnTheLevel[tempLvl-1] 
+						<< ". Do you want to replay the level(Y/n)? Your current result will be overwritten." << std::endl;
 				std::string answer;
 				std::cin >> answer;
 				if(answer == "Y" || answer == "y") {
-					MemoryAboutLevelsProgress[tempLvl-1] = new LevelProgress();
-					MemoryAboutLevelsProgress[tempLvl-1]->Level = tempLvl;
+					for(int i = 0; i < MemoryAboutLevelsProgress[tempLvl-1]->vpp_count; i++) {
+						MemoryAboutLevelsProgress[tempLvl-1]->vpps[i]->setBusyTime(0);
+					}
+					while(!MemoryAboutLevelsProgress[tempLvl-1]->managerLanding.empty()) {
+						MemoryAboutLevelsProgress[tempLvl-1]->managerLanding.pop();
+					}
+					MemoryAboutLevelsProgress[tempLvl-1]->countOfCorrectProcessedRequests = 0;
+					MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests = 0;
 					game(MemoryAboutLevelsProgress[tempLvl-1]);
 				}
-				else if(answer == "N" || answer == "n"){
-					gameProcessing();
+				else {
+					return gameProcessing("Begin", 0);
 				}
-				else if(answer == "exit") {
-					continue;
-				}
-			}
-			else {
-				game(MemoryAboutLevelsProgress[0]);
 			}
 		}
 		else {
-			if(MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests > 0) {
-				if(MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests < countOfReQuestsOnTheLevel[tempLvl-1] ) {
-					std::cout << "You have already started this level before, but did not finish it. Do you want to continue(C) or start over(S)? Your progress will be overwritten" << std::endl;
-					std::string answer;
-					std::cin >> answer;
-					if(answer == "C") {
-						game(MemoryAboutLevelsProgress[tempLvl-1]);
-					}
-					else if(answer == "S") {
-						MemoryAboutLevelsProgress[tempLvl-1] = new LevelProgress();
-						MemoryAboutLevelsProgress[tempLvl-1]->Level = tempLvl;
-						game(MemoryAboutLevelsProgress[tempLvl-1]);
-					}
-					else if(answer == "exit") {
-						continue;
-					}
-				}
-				else if(MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests == countOfReQuestsOnTheLevel[tempLvl-1] ) {
-					std::cout << "you have already completed this level before. Your result: "<< MemoryAboutLevelsProgress[tempLvl-1]->countOfCorrectProcessedRequests
-						<< " correct queries from : " << countOfReQuestsOnTheLevel[tempLvl-1] << ". do you want to replay the level(Y/n)? Your current result will be overwritten." << std::endl;
-				}
-				std::string answer;
+			game(MemoryAboutLevelsProgress[tempLvl-1]);
+		}
+	}
+	else if(point == "LevelComplete") {
+		LevelProgress* completedLevel = MemoryAboutLevelsProgress[tempLvl-1];
+		int correct = completedLevel->countOfCorrectProcessedRequests;
+		int total = countOfReQuestsOnTheLevel[tempLvl-1];
+		std::string answer;
+		double percent = double(correct) / double(total);
+		// если выполнено больше 75 процентов запросов и уровень не последний, то мы можем перейти на следующий уровень:
+		if(percent >= 0.75) {
+			if(tempLvl != countOfReQuestsOnTheLevel.size()) { // сравниваем с размером количества запросов на уровне, то есть с количеством уровней
+				// эта часть если уровень не последний
+				std::cout << "Nice work! You have " << correct << "/" << total << " passed requests. You can go to the next level(n) or improve your result(i)." << std::endl;
 				std::cin >> answer;
-				if(answer == "Y") {
-					MemoryAboutLevelsProgress[tempLvl-1] = new LevelProgress();
-					MemoryAboutLevelsProgress[tempLvl-1]->Level = tempLvl;
-					game(MemoryAboutLevelsProgress[tempLvl-1]);
+				if(answer == "n" || answer == "N") {
+					// Проверка прогресса на следующем уровне
+					if(MemoryAboutLevelsProgress[tempLvl]->countOfProcessedRequests > 0) {
+						std::cout << "Next level already has progress: " 
+								<< MemoryAboutLevelsProgress[tempLvl]->countOfCorrectProcessedRequests 
+								<< "/" << countOfReQuestsOnTheLevel[tempLvl] 
+								<< ". Are you sure you want to overwrite it? (Y/n)" << std::endl;
+						std::cin >> answer;
+						if(answer == "Y" || answer == "y") {
+							for(int i = 0; i < MemoryAboutLevelsProgress[tempLvl-1]->vpp_count; i++) {
+								MemoryAboutLevelsProgress[tempLvl-1]->vpps[i]->setBusyTime(0);
+							}
+							while(!MemoryAboutLevelsProgress[tempLvl-1]->managerLanding.empty()) {
+								MemoryAboutLevelsProgress[tempLvl-1]->managerLanding.pop();
+							}
+							MemoryAboutLevelsProgress[tempLvl-1]->countOfCorrectProcessedRequests = 0;
+							MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests = 0;
+						}
+						else if(answer == "exit") {
+							return gameProcessing("Begin", 0);
+						}
+					}
+					game(MemoryAboutLevelsProgress[tempLvl]); // переходим на следующий уровень
+				}
+				else if(answer == "I" || answer == "i") {
+					for(int i = 0; i < MemoryAboutLevelsProgress[tempLvl-1]->vpp_count; i++) {
+						MemoryAboutLevelsProgress[tempLvl-1]->vpps[i]->setBusyTime(0);
+					}
+					while(!MemoryAboutLevelsProgress[tempLvl-1]->managerLanding.empty()) {
+						MemoryAboutLevelsProgress[tempLvl-1]->managerLanding.pop();
+					}
+					MemoryAboutLevelsProgress[tempLvl-1]->countOfCorrectProcessedRequests = 0;
+					MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests = 0;
+					game(MemoryAboutLevelsProgress[tempLvl-1]); // улучшаем наш результат
 				}
 				else if(answer == "exit") {
-					continue;
+					return gameProcessing("Begin", 0);
+				}
+			}
+			else { // если последний уровень, то можно только улучшить результат
+				if(correct == total) { 
+					// если прошли на максимум, то выходим в главное меню на выбор уровня
+					std::cout << "You have max result!" << std::endl;
+					gameProcessing("Begin", 0);
 				}
 				else {
-					gameProcessing();
+					std::cout << "Nice work! You have " << correct << "/" << total << " passed requests. You can improve the result. Will you go(Y/n)?" << std::endl;
+					std::cin >> answer;
+					if(answer == "Y" || answer == "y") {
+						for(int i = 0; i < MemoryAboutLevelsProgress[tempLvl-1]->vpp_count; i++) {
+							MemoryAboutLevelsProgress[tempLvl-1]->vpps[i]->setBusyTime(0);
+						}
+						while(!MemoryAboutLevelsProgress[tempLvl-1]->managerLanding.empty()) {
+							MemoryAboutLevelsProgress[tempLvl-1]->managerLanding.pop();
+						}
+						MemoryAboutLevelsProgress[tempLvl-1]->countOfCorrectProcessedRequests = 0;
+						MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests = 0;
+						game(MemoryAboutLevelsProgress[tempLvl-1]);
+					}
+					else {
+						return gameProcessing("Begin", 0);
+					}
 				}
 			}
-			else {
+		}
+		else { // нужно либо перепройти уровень либо выбрать другой ниже
+			std::cout << "You need to replay this level or choose another. Replay? (Y/N)" << std::endl;
+			std::string answer;
+			std::cin >> answer;
+			if(answer == "Y" || answer == "y") {
+				for(int i = 0; i < MemoryAboutLevelsProgress[tempLvl-1]->vpp_count; i++) {
+					MemoryAboutLevelsProgress[tempLvl-1]->vpps[i]->setBusyTime(0);
+				}
+				while(!MemoryAboutLevelsProgress[tempLvl-1]->managerLanding.empty()) {
+					MemoryAboutLevelsProgress[tempLvl-1]->managerLanding.pop();
+				}
+				MemoryAboutLevelsProgress[tempLvl-1]->countOfCorrectProcessedRequests = 0;
+				MemoryAboutLevelsProgress[tempLvl-1]->countOfProcessedRequests = 0;
 				game(MemoryAboutLevelsProgress[tempLvl-1]);
 			}
+			else {
+				return gameProcessing("Begin", 0);
+			}
 		}
-	}	
-	
+	}
+		
 }
