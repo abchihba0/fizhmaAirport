@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
 #include "Airport.h"
-#include "Authorization.h"
+#include "AuthManager.h"
 #include "Database.h" // Убедитесь, что этот заголовок существует
 #include "Airplane.h" // Если используется
 #include "VPP.h"      // Если используется
@@ -10,6 +10,7 @@ int main() {
     // Инициализация базы данных и менеджера авторизации
     Database db("game_progress.db");
     AuthManager auth(db);
+
 
     User* user = nullptr;
     std::string choice;
