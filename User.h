@@ -3,7 +3,7 @@
 #include <vector>
 struct User {
     std::string username;
-    std::string password; // В реальном приложении пароли должны храниться в зашифрованном виде
+    std::string password; 
     int levelProgress; // Уровень прогресса
     int correctRequests; // Количество правильно обработанных запросов
     int totalRequests; // Общее количество запросов

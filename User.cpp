@@ -1,4 +1,4 @@
-   #pragma once
+ 
    #include "User.h"
    #include "Database.h"
    #include <iostream>

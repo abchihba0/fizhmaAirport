@@ -3,6 +3,9 @@
 #include "Airplane.h"
 #include "VPP.h"
 #include <queue>
+#include "Database.h"
+#include "User.h"
+
 // количество уровней нужно продумать, оно должно быть нам известно, в примере ниже уровней допустим будет 5
 
 // компаратор для очереди
