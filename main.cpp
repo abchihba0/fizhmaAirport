@@ -68,6 +68,7 @@ int main() {
     }
 
     // Сохранение прогресса и очистка перед выходом
+    
     if (user) {
         db.updateUserProgress(*user);
         delete user;
