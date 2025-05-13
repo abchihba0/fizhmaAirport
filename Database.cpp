@@ -37,7 +37,7 @@ bool Database::createUsersTable() {
 }
 
 bool Database::createUser(const User& user) {
-    const char* sql = "INSERT INTO users (username, password, levelProgress, correctRequests, totalRequests) VALUES (?, ?, 0, 0, 0);";
+    const char* sql = "INSERT INTO users \(username, password, levelProgress, correctRequests, totalRequests) VALUES (?, ?, 0, 0, 0);";
     sqlite3_stmt* stmt = nullptr;
 
     if (sqlite3_prepare_v2(db, sql, -1, &stmt, nullptr) != SQLITE_OK) {
@@ -106,4 +106,5 @@ void Database::updateUserProgress(const User& user) {
     }
 
     sqlite3_finalize(stmt);
+    
 }

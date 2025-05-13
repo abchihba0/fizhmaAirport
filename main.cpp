@@ -61,7 +61,7 @@ int main() {
                  "To exit to the main menu, you can write exit at any time the game is going on." << std::endl;
 
     std::string answer;
-    std::cout << "Are you ready to go (Y/n)?" << std::endl;
+    std::cout << "Are you ready to go?" << std::endl;
     std::cin >> answer;
     if (answer == "Y" || answer == "y") {
         port.gameProcessing("Begin", 0, db, *user); // Передаем базу данных и пользователя в игру
