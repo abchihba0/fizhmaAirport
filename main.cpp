@@ -9,7 +9,7 @@
 using namespace std;
 
 int main() {
-
+//
     Airport port;
 	std::vector<int>lenghts(5, 10000);
 	std::vector<int>types(6);
