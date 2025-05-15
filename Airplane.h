@@ -2,31 +2,32 @@
 #include  <string>
 
 class Airplane {
-    public:
-        virtual ~Airplane() = default;
-        virtual std::string getType() const = 0;
-        virtual int getMaxCircle() const = 0;
-        virtual int getVppLength() const = 0;
-        virtual int getRequiredTime() const = 0;
+public:
+    virtual ~Airplane() = default;
+    virtual std::string getType() const = 0;
+    virtual int getMaxCircle() const = 0;
+    virtual int getVppLength() const = 0;
+    virtual int getRequiredTime() const = 0;
 
-        int getTime()const {return timeOnTheCircle;}
-        void increaseCircle() {circle+=1;}
-        void setTime(int time) {timeOnTheCircle = time;}
-    protected:
-        int circle = 1;
-        int timeOnTheCircle = 0;
+    int getTime()const {return timeOnTheCircle;}
+    int getCircle()const {return circle;}
+    void increaseCircle() {circle+=1;}
+    void setTime(int time) {timeOnTheCircle = time;}
+protected:
+    int circle = 0;
+    int timeOnTheCircle = 0;
 };
 
 
 class CargoPlane : public Airplane {
-    public:
-        std::string getType() const override { return "CargoPlane"; }
-        int getMaxCircle() const override {return MAX_CIRCLES;}
-        int getVppLength() const override {return NEED_VPP_LENGTH;}
-        int getRequiredTime() const override {return REQUIRED_TIME;}
-        static const int MAX_CIRCLES = 10;  
-        static const int NEED_VPP_LENGTH = 4000;  // meters
-        static const int REQUIRED_TIME = 6;  //minutes
+public:
+    std::string getType() const override { return "CargoPlane"; }
+    int getMaxCircle() const override {return MAX_CIRCLES;}
+    int getVppLength() const override {return NEED_VPP_LENGTH;}
+    int getRequiredTime() const override {return REQUIRED_TIME;}
+    static const int MAX_CIRCLES = 2;//10;  
+    static const int NEED_VPP_LENGTH = 4000;  // meters
+    static const int REQUIRED_TIME = 6;  //minutes
 };
 
 
@@ -36,7 +37,7 @@ public:
     int getMaxCircle() const override {return MAX_CIRCLES;}
     int getVppLength() const override {return NEED_VPP_LENGTH;}
     int getRequiredTime() const override {return REQUIRED_TIME;}
-    static const int MAX_CIRCLES = 15;
+    static const int MAX_CIRCLES = 2;//15;
     static const int NEED_VPP_LENGTH = 2000;  
     static const int REQUIRED_TIME = 4;  
 };
@@ -48,7 +49,7 @@ public:
     int getMaxCircle() const override {return MAX_CIRCLES;}
     int getVppLength() const override {return NEED_VPP_LENGTH;}
     int getRequiredTime() const override {return REQUIRED_TIME;}
-    static const int MAX_CIRCLES = 5;
+    static const int MAX_CIRCLES = 2;//5;
     static const int NEED_VPP_LENGTH = 500;  
     static const int REQUIRED_TIME = 2;  
 };
@@ -60,7 +61,7 @@ public:
     int getMaxCircle() const override {return MAX_CIRCLES;}
     int getVppLength() const override {return NEED_VPP_LENGTH;}
     int getRequiredTime() const override {return REQUIRED_TIME;}
-    static const int MAX_CIRCLES = 20;
+    static const int MAX_CIRCLES = 2;//20;
     static const int NEED_VPP_LENGTH = 1000;  
     static const int REQUIRED_TIME = 3;  
 };
@@ -72,7 +73,7 @@ public:
     int getMaxCircle() const override {return MAX_CIRCLES;}
     int getVppLength() const override {return NEED_VPP_LENGTH;}
     int getRequiredTime() const override {return REQUIRED_TIME;}
-    static const int MAX_CIRCLES = 8;
+    static const int MAX_CIRCLES = 2;//8;
     static const int NEED_VPP_LENGTH = 800;  
     static const int REQUIRED_TIME = 3;  
 };
@@ -84,7 +85,7 @@ public:
     int getMaxCircle() const override {return MAX_CIRCLES;}
     int getVppLength() const override {return NEED_VPP_LENGTH;}
     int getRequiredTime() const override {return REQUIRED_TIME;}
-    static const int MAX_CIRCLES = 12;
+    static const int MAX_CIRCLES = 2;//12;
     static const int NEED_VPP_LENGTH = 1500;  
     static const int REQUIRED_TIME = 5;  
 };
