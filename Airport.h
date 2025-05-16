@@ -1,8 +1,11 @@
+[file name]: Airport.h
+[file content begin]
 #pragma once
 #include <vector>
 #include "Airplane.h"
 #include "VPP.h"
 #include <queue>
+#include <sstream>
 // количество уровней нужно продумать, оно должно быть нам известно, в примере ниже уровней допустим будет 5
 
 // компаратор для очереди
@@ -39,3 +42,5 @@ class Airport {
 
 		std::vector<LevelProgress*> returnMemory() {return MemoryAboutLevelsProgress;}
 };
+
+[file content end]

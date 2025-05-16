@@ -1,0 +1,66 @@
+// {
+// 	"version": "2.0.0",
+// 	"tasks": [
+// 		{
+// 			"type": "cppbuild",
+// 			"label": "C/C++: g++.exe сборка активного файла",
+// 			"command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
+// 			"args": [
+// 				"-fdiagnostics-color=always",
+// 				"-g",
+// 				"${file}",
+// 				"-o",
+// 				"${fileDirname}\\${fileBasenameNoExtension}.exe"
+// 			],
+// 			"options": {
+// 				"cwd": "${fileDirname}"
+// 			},
+// 			"problemMatcher": [
+// 				"$gcc"
+// 			],
+// 			"group": "build",
+// 			"detail": "компилятор: C:\\msys64\\ucrt64\\bin\\g++.exe"
+// 		}
+// 	]
+// }
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build Airport Manager with ImGui",
+      "type": "cppbuild",
+      "command": "C:\\msys64\\ucrt64\\bin\\g++.exe",
+      "args": [
+        "-fdiagnostics-color=always",
+        "-g",
+        "-std=c++20",
+        "-Wall",
+        "-Wextra",
+        "${workspaceFolder}/main.cpp",
+        "${workspaceFolder}/Airplane.cpp",
+        "${workspaceFolder}/Airport.cpp",
+        "${workspaceFolder}/VPP.cpp",
+        "-I${workspaceFolder}",
+        // "-IC:/imgui",
+        // "-IC:/glfw/include",
+        // "-LC:/glfw/lib",
+        "-I${workspaceFolder}/imgui",
+        "-I${workspaceFolder}/glfw/include",
+        "-lglfw3",
+        "-lopengl32",
+        "-lgdi32",
+        "-o",
+        "${workspaceFolder}/AirportManager.exe"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": ["$gcc"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "detail": "Сборка Airport Manager с ImGui и GLFW"
+    }
+  ]
+}

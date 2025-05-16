@@ -1,3 +1,6 @@
+
+[file name]: Airport.cpp
+[file content begin]
 #include "Airport.h"
 #include<iostream>
 #include <ctime>
@@ -5,6 +8,7 @@
 #include <thread>  // для sleep_for
 #include <algorithm>
 #include <queue>
+#include <sstream>
 
 
 
@@ -131,8 +135,10 @@ Airplane* Airport::set_manager(LevelProgress* ourLevel){
 
 void Airport::game(LevelProgress* ourLevel)
 {
+	std::ostringstream oss;
+    std::streambuf* old_cout = std::cout.rdbuf(oss.rdbuf());
 	srand(time(0));
-	std::cout << "You have " << ourLevel->vpp_count << " vpps on " << ourLevel->Level << " level" << std::endl;
+	oss << "You have " << ourLevel->vpp_count << " vpps on " << ourLevel->Level << " level" << std::endl;
 	double percentageOfCurrentLevelPassed = 0.0; // создаем переменную, в которую после обработки всех запросов запишется процент их прохождения
 	// колво правильных запросов равно количеству корректных запросов их сохраненного результата
 	int requests=ourLevel->countOfProcessedRequests;
@@ -351,6 +357,8 @@ void Airport::game(LevelProgress* ourLevel)
 	
 	// Перенаправляем в gameProcessing для обработки завершения уровня
 	gameProcessing("LevelComplete", ourLevel->Level);
+
+	std::cout.rdbuf(old_cout);
 }
 
 
