@@ -1,0 +1,6 @@
+D:/hse/c++/airport/fizhmaAirport/build/CMakeFiles/my_app.dir
+D:/hse/c++/airport/fizhmaAirport/build/CMakeFiles/edit_cache.dir
+D:/hse/c++/airport/fizhmaAirport/build/CMakeFiles/rebuild_cache.dir
+D:/hse/c++/airport/fizhmaAirport/build/imguiLibrary/imgui/CMakeFiles/imgui.dir
+D:/hse/c++/airport/fizhmaAirport/build/imguiLibrary/imgui/CMakeFiles/edit_cache.dir
+D:/hse/c++/airport/fizhmaAirport/build/imguiLibrary/imgui/CMakeFiles/rebuild_cache.dir

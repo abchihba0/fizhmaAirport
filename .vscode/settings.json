@@ -115,5 +115,6 @@
     "stop_token": "cpp",
     "thread": "cpp",
     "queue": "cpp"
-  }
+  },
+  "workbench.settings.useSplitJSON": false
 }
