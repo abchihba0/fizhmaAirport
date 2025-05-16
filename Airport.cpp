@@ -416,6 +416,7 @@ int Airport::processing(Airplane *tempPlane, LevelProgress* ourLevel)
 			continue;
 		}
 	}
+	return 0;
 }
 
 
