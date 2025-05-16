@@ -1,46 +1,91 @@
-[file name]: Airport.h
-[file content begin]
 #pragma once
-#include <vector>
-#include "Airplane.h"
-#include "VPP.h"
-#include <queue>
-#include <sstream>
-// количество уровней нужно продумать, оно должно быть нам известно, в примере ниже уровней допустим будет 5
+#include  <string>
 
-// компаратор для очереди
-struct CompareByTimeOnTheCircle {
-	bool operator()(Airplane* a, Airplane* b) {
-		return a->getTime() > b->getTime();
-	}
-};
+class Airplane {
+public:
+    virtual ~Airplane() = default;
+    virtual std::string getType() const = 0;
+    virtual int getMaxCircle() const = 0;
+    virtual int getVppLength() const = 0;
+    virtual int getRequiredTime() const = 0;
 
-// создаем структуру, которая будет хранить прогресс на уровне, то есть массив с занятостью vpps в данный момент, ОЧЕРЕДЬ manager из самолетов на следующих кругах 
-struct LevelProgress {
-	int Level = 1;
-	int vpp_count;
-	std::vector<VPP*>vpps; // массив из впп
-	// std::vector<Airplane*> manager;// в этот массив будут добавляться запросы 
-	std::priority_queue<Airplane*,std::vector<Airplane*>,CompareByTimeOnTheCircle> managerLanding;// в этот массив будут добавляться запросы на посадку
-	std::priority_queue<Airplane*,std::vector<Airplane*>,CompareByTimeOnTheCircle> managerRise;// в этот массив будут добавляться запросы на взлёт
-	int countOfProcessedRequests = 0; // количество обработанных запросов
-	int countOfCorrectProcessedRequests = 0; // количество тех запросов, которые были обработанны корректно(то есть самолет был посажен или взлетел(те запросы, которые хранят самолеты на следующих кругах ни там ни там, они в доп массиве manager))
+    int getTime()const {return timeOnTheCircle;}
+    int getCircle()const {return circle;}
+    void increaseCircle() {circle+=1;}
+    void setTime(int time) {timeOnTheCircle = time;}
+protected:
+    int circle = 0;
+    int timeOnTheCircle = 0;
 };
 
 
-class Airport {
-	private:std::vector<int>countOfReQuestsOnTheLevel = {15, 20, 25, 30, 35}; // количество запросов на разных уровнях
-		const std::vector<int> runwaysPerLevel = {3, 5, 7, 7, 7}; // Количество полос для каждого уровня
-		std::vector<LevelProgress*>MemoryAboutLevelsProgress; // надо крч такой вектор чтобы можно было оттуда доставать прогресс уровня из структуры сразу, то есть по умолчанию все значения ноль и потом при выходе из игры прогрес перезаписывается
-	public:
-		Airport();
-		Airplane* set_manager(LevelProgress* ourLevel);
-		int processing(Airplane* tempPlane, LevelProgress* ourLevel);
-		void game(LevelProgress* ourLevel);
-		void gameProcessing(std::string point,  int tempLvl);
-
-
-		std::vector<LevelProgress*> returnMemory() {return MemoryAboutLevelsProgress;}
+class CargoPlane : public Airplane {
+public:
+    std::string getType() const override { return "CargoPlane"; }
+    int getMaxCircle() const override {return MAX_CIRCLES;}
+    int getVppLength() const override {return NEED_VPP_LENGTH;}
+    int getRequiredTime() const override {return REQUIRED_TIME;}
+    static const int MAX_CIRCLES = 2;//10;  
+    static const int NEED_VPP_LENGTH = 4000;  // meters
+    static const int REQUIRED_TIME = 6;  //minutes
 };
 
-[file content end]
+
+class PassengerPlane : public Airplane {
+public:
+    std::string getType() const override { return "PassengerPlane"; }
+    int getMaxCircle() const override {return MAX_CIRCLES;}
+    int getVppLength() const override {return NEED_VPP_LENGTH;}
+    int getRequiredTime() const override {return REQUIRED_TIME;}
+    static const int MAX_CIRCLES = 2;//15;
+    static const int NEED_VPP_LENGTH = 2000;  
+    static const int REQUIRED_TIME = 4;  
+};
+
+
+class AgriculturePlane : public Airplane {
+public:
+    std::string getType() const override { return "AgriculturePlane"; }
+    int getMaxCircle() const override {return MAX_CIRCLES;}
+    int getVppLength() const override {return NEED_VPP_LENGTH;}
+    int getRequiredTime() const override {return REQUIRED_TIME;}
+    static const int MAX_CIRCLES = 2;//5;
+    static const int NEED_VPP_LENGTH = 500;  
+    static const int REQUIRED_TIME = 2;  
+};
+
+
+class MilitaryPlane : public Airplane {
+public:
+    std::string getType() const override { return "MilitaryPlane"; }
+    int getMaxCircle() const override {return MAX_CIRCLES;}
+    int getVppLength() const override {return NEED_VPP_LENGTH;}
+    int getRequiredTime() const override {return REQUIRED_TIME;}
+    static const int MAX_CIRCLES = 2;//20;
+    static const int NEED_VPP_LENGTH = 1000;  
+    static const int REQUIRED_TIME = 3;  
+};
+
+
+class BusinessPlane : public Airplane {
+public:
+    std::string getType() const override { return "BusinessPlane"; }
+    int getMaxCircle() const override {return MAX_CIRCLES;}
+    int getVppLength() const override {return NEED_VPP_LENGTH;}
+    int getRequiredTime() const override {return REQUIRED_TIME;}
+    static const int MAX_CIRCLES = 2;//8;
+    static const int NEED_VPP_LENGTH = 800;  
+    static const int REQUIRED_TIME = 3;  
+};
+
+
+class RescuePlane : public Airplane {
+public:
+    std::string getType() const override { return "RescuePlane"; }
+    int getMaxCircle() const override {return MAX_CIRCLES;}
+    int getVppLength() const override {return NEED_VPP_LENGTH;}
+    int getRequiredTime() const override {return REQUIRED_TIME;}
+    static const int MAX_CIRCLES = 2;//12;
+    static const int NEED_VPP_LENGTH = 1500;  
+    static const int REQUIRED_TIME = 5;  
+};
