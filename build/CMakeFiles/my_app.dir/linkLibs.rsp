@@ -1,1 +1,5 @@
+<<<<<<< HEAD
   -LC:/msys64/mingw64/lib  imguiLibrary/imgui/libimgui.a C:/msys64/mingw64/lib/libglfw3.dll.a -lopengl32 -lglu32 -lopengl32 -lglu32 -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 
+=======
+ imguiLibrary/imgui/libimgui.a C:/msys64/mingw64/lib/libglfw3.dll.a -lopengl32 -lglu32 -lopengl32 -lglu32 -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32 
+>>>>>>> 2c2a1984c80ac5f23b056f29034574ff3801e431

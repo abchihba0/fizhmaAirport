@@ -34,6 +34,18 @@ endif()
 
 # Set path to fallback-tool for dependency-resolution.
 if(NOT DEFINED CMAKE_OBJDUMP)
+<<<<<<< HEAD
   set(CMAKE_OBJDUMP "C:/msys64/ucrt64/bin/objdump.exe")
 endif()
 
+=======
+  set(CMAKE_OBJDUMP "C:/msys64/mingw64/bin/objdump.exe")
+endif()
+
+string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
+       "${CMAKE_INSTALL_MANIFEST_FILES}")
+if(CMAKE_INSTALL_LOCAL_ONLY)
+  file(WRITE "D:/hse/c++/airport/fizhmaAirport/build/imguiLibrary/imgui/install_local_manifest.txt"
+     "${CMAKE_INSTALL_MANIFEST_CONTENT}")
+endif()
+>>>>>>> 2c2a1984c80ac5f23b056f29034574ff3801e431
