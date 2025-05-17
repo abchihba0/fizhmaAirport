@@ -59,3 +59,7 @@ imgui.ini
 
 # Игнорировать файлы VS Code (если они не должны быть в репозитории)
 .vscode/
+
+build/
+
+imguiLibrary/
