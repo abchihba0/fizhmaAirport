@@ -1,0 +1,61 @@
+# ====================== #
+#       CMake Build      #
+# ====================== #
+.cmake/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cbp
+*.cmake
+CMakeUserPresets.json
+
+# ====================== #
+#      ImGui & Binaries  #
+# ====================== #
+imgui.ini
+imguiLibrary/imgui/
+bin/
+build/
+*.exe
+*.a
+*.so
+*.dll
+*.lib
+*.obj
+*.pdb
+*.ilk
+*.exp
+
+# ====================== #
+#    Editor & IDE Files  #
+# ====================== #
+.vscode/
+.idea/
+*.swp
+*.swo
+*.user
+*.suo
+*.ncb
+*.sdf
+
+# ====================== #
+#    System & Temp       #
+# ====================== #
+.DS_Store
+Thumbs.db
+*.tmp
+
+# Игнорировать CMake-файлы
+.cmake/
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+
+# Игнорировать файлы ImGui (если они подключаются как подмодуль или копируются)
+imguiLibrary/imgui/
+imgui.ini
+
+# Игнорировать файлы VS Code (если они не должны быть в репозитории)
+.vscode/
