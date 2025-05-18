@@ -5,6 +5,7 @@
 #include <thread>  // для sleep_for
 #include <algorithm>
 #include <queue>
+#include <sstream>
 
 
 
@@ -82,6 +83,12 @@ Airport::Airport() {
 	}
 }
 
+int Airport::getLevelRequestCount(int level) const {
+    if (level >= 0 && level < countOfReQuestsOnTheLevel.size()) {
+        return countOfReQuestsOnTheLevel[level];
+    }
+    return 0;
+}
 
 Airplane* Airport::set_manager(LevelProgress* ourLevel){
   
@@ -630,4 +637,18 @@ void Airport::gameProcessing(std::string point, int tempLvl)
 		}
 	}
 		
+}
+
+std::string Airport::processCommand(const std::string& input, int level) {
+    std::stringstream output;
+    // Сохраняем старый буфер cout
+    auto old_buf = std::cout.rdbuf(output.rdbuf());
+    
+    // Вызываем основную логику обработки
+    gameProcessing(input, level);
+    
+    // Восстанавливаем cout
+    std::cout.rdbuf(old_buf);
+    
+    return output.str();
 }

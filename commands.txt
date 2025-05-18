@@ -1,0 +1,10 @@
+cd build
+
+# Генерируем проект (для Windows с MinGW)
+cmake .. -G "MinGW Makefiles"
+
+# Собираем проект
+cmake --build . --config Release
+
+#запуск проекта
+./my_app.exe
