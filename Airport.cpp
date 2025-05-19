@@ -128,13 +128,6 @@ Airplane* Airport::set_manager(LevelProgress* ourLevel){
 	  return nullptr;
   }
 
-// основная задача: функцию game нужно доработать. В процессе processing'a запроса мы можем отправить
-// самолет на второй круг, в таком случае, у нас пойдет время, которое он будет на втором круге, хотя 
-// одновременно с этим другие запросы могут появляться. Пусть мы отправили самолет на второй круг и пошло
-// его время на втором круге и  допустим запросы появляются через n минут. ЗАПРОСЫ НЕ МОГУТ ПОЯВЛЯТЬСЯ ЧАЩЕ ЧЕМ
-// n МИНУТ, ПОЭТОМУ ЕСЛИ ЧЕРЕЗ ВРЕМЯ n ОСТАНЕТСЯ K < n МИНУТ ДО ПРИЛЕТА САМОЛЕТА С ДОП. КРУГА, ТО САМОЛЕТ СЕЙЧАС НЕ ГЕНЕРИРУЕТСЯ,
-// ВРЕМЯ МЕЖДУ ЗАПРОСАМИ БУДЕТ n+K минут. То есть не должно быть такого, что самолет сгенерировался, а потом через секунду прилетит самолет с доп круга. 
-
 
 void Airport::game(LevelProgress* ourLevel)
 {
@@ -208,10 +201,6 @@ void Airport::game(LevelProgress* ourLevel)
 					else if(result == 0) {
 						ourLevel->countOfProcessedRequests += 1;
 					}
-						
-					// обработка запроса
-					// std::this_thread::sleep_for(std::chrono::milliseconds(5000)); // задержка между запросами в 5 секунд
-					// ourLevel->countOfProcessedRequests += 1; // Увеличиваем счетчик обработанных запросов
 				}
 				i--;
 			}
@@ -350,9 +339,6 @@ void Airport::game(LevelProgress* ourLevel)
 			else if(result == 0) {
 				ourLevel->countOfProcessedRequests += 1;
 			}
-			// обработка запроса
-			// std::this_thread::sleep_for(std::chrono::milliseconds(5000)); // задержка между запросами в 5 секунд
-			// ourLevel->countOfProcessedRequests += 1; // Увеличиваем счетчик обработанных запросов
 		}
 	}
 	
@@ -430,7 +416,7 @@ int Airport::processing(Airplane *tempPlane, LevelProgress* ourLevel)
 void Airport::gameProcessing(std::string point, int tempLvl)
 {	
 	if(point == "Begin") {
-		std::cout << "To accept the request, you need to press the number of vpp. \nThe request will be skipped when the timer expires \nTo send the plane on a next circle or ask it to wait for takeoff, you need to press -1." << std::endl;
+		std::cout << "To accept the request, you need to press the number of vpp. \nTo send the plane on a next circle or ask it to wait for takeoff, you need to press -1." << std::endl;
 		
 		// Вывод всех доступных уровней с прогрессом
 		std::cout << "Available levels:" << std::endl;

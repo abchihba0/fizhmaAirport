@@ -17,7 +17,6 @@ struct LevelProgress {
 	int Level = 1;
 	int vpp_count;
 	std::vector<VPP*>vpps; // массив из впп
-	// std::vector<Airplane*> manager;// в этот массив будут добавляться запросы 
 	std::priority_queue<Airplane*,std::vector<Airplane*>,CompareByTimeOnTheCircle> managerLanding;// в этот массив будут добавляться запросы на посадку
 	std::priority_queue<Airplane*,std::vector<Airplane*>,CompareByTimeOnTheCircle> managerRise;// в этот массив будут добавляться запросы на взлёт
 	int countOfProcessedRequests = 0; // количество обработанных запросов

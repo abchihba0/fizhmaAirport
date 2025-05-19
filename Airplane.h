@@ -11,11 +11,14 @@ public:
 
     int getTime()const {return timeOnTheCircle;}
     int getCircle()const {return circle;}
+    void setRequestType(int r) { requestType = r; }
     void increaseCircle() {circle+=1;}
     void setTime(int time) {timeOnTheCircle = time;}
+    int getRequestType()const {return requestType;}
 protected:
     int circle = 0;
     int timeOnTheCircle = 0;
+    int requestType = 0; // 0/1 посадка/взлёт
 };
 
 

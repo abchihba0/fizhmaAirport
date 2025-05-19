@@ -11,6 +11,14 @@
 #include <vector>
 #include <sstream>
 
+struct GameState {
+    bool waitingForInput = false;
+    Airplane* currentPlane = nullptr;
+    int currentLevel = 0;
+    bool levelComplete = false;
+    bool showLevelSelection = true;
+};
+
 static void glfw_error_callback(int error, const char* description) {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
@@ -96,7 +104,7 @@ void ShowWelcomeWindow(bool& p_open, Airport& port, bool& show_game, int windowW
     ImGui::End();
 }
 
-void ShowGameWindow(bool& p_open, Airport& port, bool& show_welcome, bool& show_level_complete, int& current_level, std::string& game_output, int windowWidth, int windowHeight) {
+void ShowGameWindow(bool& p_open, Airport& port, bool& show_welcome, bool& show_level_complete, int& current_level, int windowWidth, int windowHeight) {
     static std::string output_text;
     static char input_buf[256] = "";
     static bool scroll_to_bottom = false;
@@ -118,9 +126,6 @@ void ShowGameWindow(bool& p_open, Airport& port, bool& show_welcome, bool& show_
         ImGui::SetScrollHereY(1.0f);
         scroll_to_bottom = false;
     }
-    // Auto-scroll
-    // if (ImGui::GetScrollY() >= ImGui::GetScrollMaxY())
-    //     ImGui::SetScrollHereY(1.0f);
     ImGui::EndChild();
     ImGui::Separator();
     
@@ -139,7 +144,7 @@ void ShowGameWindow(bool& p_open, Airport& port, bool& show_welcome, bool& show_
             if (ImGui::Button(("Runway " + std::to_string(i+1)).c_str(), ImVec2(100, 40))) {
                 if (!is_busy) {
                     output_text += "> Selected Runway " + std::to_string(i+1) + "\n";
-                    game_output += port.processCommand(std::to_string(i+1), current_level + 1);
+                    output_text += port.processCommand(std::to_string(i+1), current_level + 1);
                     scroll_to_bottom = true;
                 }
             }
@@ -153,13 +158,13 @@ void ShowGameWindow(bool& p_open, Airport& port, bool& show_welcome, bool& show_
     ImGui::Spacing();
     if (ImGui::Button("Send to Next Circle", ImVec2(230, 40))) {
         output_text += "> Sent to next circle\n";
-        game_output += port.processCommand("-1", current_level + 1);
+        output_text += port.processCommand("-1", current_level + 1);
         scroll_to_bottom = true;
     }
     ImGui::SameLine();
     if (ImGui::Button("Skip Request", ImVec2(230, 40))) {
         output_text += "> Skipped request\n";
-        game_output += port.processCommand("0", current_level + 1);
+        output_text += port.processCommand("0", current_level + 1);
         scroll_to_bottom = true;
     }
     ImGui::SameLine();
@@ -293,7 +298,6 @@ int main() {
     bool show_game = false;
     bool show_level_complete = false;
     int current_level = 0;
-    std::string game_output;
     std::ostringstream output_stream;
     
     // Redirect cout to our string stream
@@ -315,7 +319,7 @@ int main() {
 
         // Game screen - shows the console output
         if (show_game) {
-            ShowGameWindow(show_game, port, show_welcome, show_level_complete, current_level, game_output, windowWidth, windowHeight);
+            ShowGameWindow(show_game, port, show_welcome, show_level_complete, current_level, windowWidth, windowHeight);
         }
 
         if (show_level_complete) {
@@ -346,29 +350,3 @@ int main() {
 
     return 0;
 }
-
-
-// Display current level status
-    // if (current_level > 0) {
-    //     auto level_progress = port.returnMemory()[current_level-1];
-    //     auto requests_info = port.returnRequestsInfo(); // Нужно добавить этот метод в класс Airport
-        
-    //     float progress = (float)level_progress->countOfCorrectProcessedRequests / 
-    //                 (float)requests_info.first[current_level-1];
-        
-    //     ImGui::Text("Level %d Progress: ", current_level);
-    //     ImGui::SameLine();
-    //     ImGui::ProgressBar(progress, ImVec2(200, 20));
-    //     ImGui::SameLine();
-    //     ImGui::Text("%d/%d", level_progress->countOfCorrectProcessedRequests, 
-    //             requests_info.first[current_level-1]);
-        
-    //     // Display runways status
-    //     ImGui::TextColored(ImVec4(0.0f, 0.8f, 1.0f, 1.0f), "Runways Status:");
-    //     for (size_t i = 0; i < level_progress->vpps.size(); i++) {
-    //         ImGui::Text("Runway %d: Length %dm - %s", 
-    //                 i+1, 
-    //                 level_progress->vpps[i]->get_lenght(),
-    //                 level_progress->vpps[i]->getBusyTime() > 0 ? "BUSY" : "AVAILABLE");
-    //     }
-    // }
