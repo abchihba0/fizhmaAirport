@@ -10,7 +10,7 @@
 #include "backends/imgui_impl_opengl3.h"
 #include "GLFW/glfw3.h"
 
-
+// делаю коммиты делаю коммиты
 int main() {
     // Инициализация базы данных и менеджера авторизации
     Database db("game_progress.db");
