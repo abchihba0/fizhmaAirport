@@ -19,8 +19,8 @@ public:
 
     // Обновить прогресс пользователя
     void updateUserProgress(const User& user);
-
 private:
     sqlite3* db = nullptr;
     std::string dbName;
 };
+

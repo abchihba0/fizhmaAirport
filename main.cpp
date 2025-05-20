@@ -2,9 +2,14 @@
 #include <string>
 #include "Airport.h"
 #include "AuthManager.h"
-#include "Database.h" // Убедитесь, что этот заголовок существует
-#include "Airplane.h" // Если используется
-#include "VPP.h"      // Если используется
+#include "Database.h" 
+#include "Airplane.h" 
+#include "VPP.h"      
+#include "imgui.h"
+#include "backends/imgui_impl_glfw.h"
+#include "backends/imgui_impl_opengl3.h"
+#include "GLFW/glfw3.h"
+
 
 int main() {
     // Инициализация базы данных и менеджера авторизации
