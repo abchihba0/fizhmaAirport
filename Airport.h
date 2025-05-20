@@ -1,6 +1,6 @@
 #pragma once
-#include<vector>
-#include"Airplane.h"
+#include <vector>
+#include "Airplane.h"
 #include "VPP.h"
 
 class Airport {

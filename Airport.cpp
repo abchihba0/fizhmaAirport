@@ -1,6 +1,5 @@
 #include "Airport.h"
 #include<iostream>
-#include<ctime>
 
 Airport::Airport() :vpp_count(0), plane_count(0),
 vpps({}), manager({})
@@ -45,7 +44,7 @@ void Airport::set_manager(std::vector<int> types_)
 Airplane* Airport::set_manager(){
 	srand(time(0));
 
-	std::vector<Airplane*> typesOfPlanesToGenerate = { //массив, состоящий из всех наших типов
+	std::vector<Airplane*> typesOfPlanesToGenerate = { //пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		new CargoPlane(),
 		new PassengerPlane(),
 		new AgriculturePlane(),
@@ -54,21 +53,21 @@ Airplane* Airport::set_manager(){
 		new RescuePlane()
 	};
 	
-	bool can_we_generate_this_type;//флажок, можем ли мы сгенерировать данный тип самолета
-	int count_of_generated_types = 6;//кол-во возможных типов самолета
-	int random_type;//случайный индекс типа самолета
+	bool can_we_generate_this_type;//пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+	int count_of_generated_types = 6;//пїЅпїЅпїЅ-пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+	int random_type;//пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
 	do {
 		can_we_generate_this_type = false;
 		random_type = rand() % count_of_generated_types;
 
-		for(auto vpp:vpps)//бегаем по дорожкам
-			if (vpp->get_lenght >= typesOfPlanesToGenerate[random_type]->getVppLength()) {//если находится нужная
+		for(auto vpp:vpps)//пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+			if (vpp->get_lenght >= typesOfPlanesToGenerate[random_type]->getVppLength()) {//пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 				can_we_generate_this_type = true;
 				break;
 			}
 
-		if (!can_we_generate_this_type)//если не находится, то присваиваем данному индексу тип самолета в конце вектора и уменьшаем колв-в
+		if (!can_we_generate_this_type)//пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ-пїЅ
 			typesOfPlanesToGenerate[random_type] = typesOfPlanesToGenerate[--count_of_generated_types];
 
 	} while (!can_we_generate_this_type&&count_of_generated_types!=0);
