@@ -62,7 +62,7 @@ Airplane* Airport::set_manager(){
 		random_type = rand() % count_of_generated_types;
 
 		for(auto vpp:vpps)//������ �� ��������
-			if (vpp->get_lenght >= typesOfPlanesToGenerate[random_type]->getVppLength()) {//���� ��������� ������
+			if (vpp->get_lenght() >= typesOfPlanesToGenerate[random_type]->getVppLength()) {//���� ��������� ������
 				can_we_generate_this_type = true;
 				break;
 			}
