@@ -9,8 +9,7 @@
 #include "backends/imgui_impl_glfw.h"
 #include "backends/imgui_impl_opengl3.h"
 #include "GLFW/glfw3.h"
-// ну ладно ещё парочку коммитов
-// ещё совсем чуть-чуть
+
 int main() {
     // Инициализация базы данных и менеджера авторизации
     Database db("game_progress.db");
