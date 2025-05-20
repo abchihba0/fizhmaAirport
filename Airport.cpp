@@ -1,9 +1,6 @@
 #include "Airport.h"
 #include<iostream>
-
-VPP::VPP(int lenght_) :lenght(lenght_), status(false)
-{
-}
+#include<ctime>
 
 Airport::Airport() :vpp_count(0), plane_count(0),
 vpps({}), manager({})
@@ -43,6 +40,43 @@ void Airport::set_manager(std::vector<int> types_)
 		case 5: manager[i] = new RescuePlane(); break;
 		}
 	}
+}
+
+Airplane* Airport::set_manager(){
+	srand(time(0));
+
+	std::vector<Airplane*> typesOfPlanesToGenerate = { //массив, состоящий из всех наших типов
+		new CargoPlane(),
+		new PassengerPlane(),
+		new AgriculturePlane(),
+		new MilitaryPlane(),
+		new BusinessPlane(),
+		new RescuePlane()
+	};
+	
+	bool can_we_generate_this_type;//флажок, можем ли мы сгенерировать данный тип самолета
+	int count_of_generated_types = 6;//кол-во возможных типов самолета
+	int random_type;//случайный индекс типа самолета
+
+	do {
+		can_we_generate_this_type = false;
+		random_type = rand() % count_of_generated_types;
+
+		for(auto vpp:vpps)//бегаем по дорожкам
+			if (vpp->get_lenght >= typesOfPlanesToGenerate[random_type]->getVppLength()) {//если находится нужная
+				can_we_generate_this_type = true;
+				break;
+			}
+
+		if (!can_we_generate_this_type)//если не находится, то присваиваем данному индексу тип самолета в конце вектора и уменьшаем колв-в
+			typesOfPlanesToGenerate[random_type] = typesOfPlanesToGenerate[--count_of_generated_types];
+
+	} while (!can_we_generate_this_type&&count_of_generated_types!=0);
+
+	if (can_we_generate_this_type)
+		return typesOfPlanesToGenerate[random_type];
+	else
+		return nullptr;
 }
 
 void Airport::get_manager() const

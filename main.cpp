@@ -3,9 +3,9 @@
 
 int main() {
 	Airport port;
-	std::vector<int>lenghts(5, 10);
+	std::vector<int>lenghts(5, 5000);
 	std::vector<int>types(6);
-	types = { 0, 1, 2, 3, 4, 5 };
+	types = { 4, 3, 1, 5, 2, 0 };
 	port.set_vpps(lenghts);
 	port.set_manager(types);
 	port.get_vpps();
