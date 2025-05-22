@@ -3,6 +3,8 @@
 #include "Airplane.h"
 #include "VPP.h"
 #include <queue>
+#include "Database.h"
+#include "User.h"
 // количество уровней нужно продумать, оно должно быть нам известно, в примере ниже уровней допустим будет 5
 
 // компаратор для очереди
@@ -32,9 +34,9 @@ class Airport {
 	public:
 		Airport();
 		Airplane* set_manager(LevelProgress* ourLevel);
-		int processing(Airplane* tempPlane, LevelProgress* ourLevel);
-		void game(LevelProgress* ourLevel);
-		void gameProcessing(std::string point,  int tempLvl);
+		int processing(Airplane* tempPlane, LevelProgress* ourLevel, Database& db, User& use);
+		void game(LevelProgress* ourLevel, Database& db, User& user);
+		void gameProcessing(std::string point, int tempLvl, Database& db, User& user);
 
 
 		std::vector<LevelProgress*> returnMemory() {return MemoryAboutLevelsProgress;}
