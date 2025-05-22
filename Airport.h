@@ -7,7 +7,7 @@
 
 // компаратор для очереди
 struct CompareByTimeOnTheCircle {
-	bool operator()(Airplane* a, Airplane* b) {
+	bool operator()(Airplane* a, Airplane* b) {	
 		return a->getTime() > b->getTime();
 	}
 };
@@ -17,7 +17,6 @@ struct LevelProgress {
 	int Level = 1;
 	int vpp_count;
 	std::vector<VPP*>vpps; // массив из впп
-	// std::vector<Airplane*> manager;// в этот массив будут добавляться запросы 
 	std::priority_queue<Airplane*,std::vector<Airplane*>,CompareByTimeOnTheCircle> managerLanding;// в этот массив будут добавляться запросы на посадку
 	std::priority_queue<Airplane*,std::vector<Airplane*>,CompareByTimeOnTheCircle> managerRise;// в этот массив будут добавляться запросы на взлёт
 	int countOfProcessedRequests = 0; // количество обработанных запросов
@@ -26,16 +25,30 @@ struct LevelProgress {
 
 
 class Airport {
-	private:std::vector<int>countOfReQuestsOnTheLevel = {15, 20, 25, 30, 35}; // количество запросов на разных уровнях
-		const std::vector<int> runwaysPerLevel = {3, 5, 7, 7, 7}; // Количество полос для каждого уровня
-		std::vector<LevelProgress*>MemoryAboutLevelsProgress; // надо крч такой вектор чтобы можно было оттуда доставать прогресс уровня из структуры сразу, то есть по умолчанию все значения ноль и потом при выходе из игры прогрес перезаписывается
-	public:
-		Airport();
-		Airplane* set_manager(LevelProgress* ourLevel);
-		int processing(Airplane* tempPlane, LevelProgress* ourLevel);
-		void game(LevelProgress* ourLevel);
-		void gameProcessing(std::string point,  int tempLvl);
+private:
+    bool inGameProcess = false;
+	Airplane* currentRequest = nullptr;
+    bool isProcessingRequest = false;
+	bool showLevelProgress = true;
+	bool isProcessingInput = false; // Флаг, указывающий, что ждём ввод
+	std::vector<int>countOfReQuestsOnTheLevel = {15, 20, 25, 30, 35}; // количество запросов на разных уровнях
+	const std::vector<int> runwaysPerLevel = {3, 5, 7, 7, 7}; // Количество полос для каждого уровня
+	std::vector<LevelProgress*>MemoryAboutLevelsProgress; // надо крч такой вектор чтобы можно было оттуда доставать прогресс уровня из структуры сразу, то есть по умолчанию все значения ноль и потом при выходе из игры прогрес перезаписывается
+public:
+	void setShowLevelProgress(bool show) { showLevelProgress = show; }
+	Airport();
+	void renderLevelSelection(GLFWwindow* window);
+	int getLevelRequestCount(int level) const;
+	Airplane* set_manager(LevelProgress* ourLevel);
+	int processing(Airplane* tempPlane, LevelProgress* ourLevel);
+	void game(LevelProgress* ourLevel, GLFWwindow* window);
+	void gameProcessing(std::string point,  int tempLvl, GLFWwindow* window);
+	std::string processCommand(const std::string& input, int level);
 
-
-		std::vector<LevelProgress*> returnMemory() {return MemoryAboutLevelsProgress;}
+	std::vector<LevelProgress*> returnMemory() {return MemoryAboutLevelsProgress;}
+	std::pair<std::vector<int>, std::vector<int>> returnRequestsInfo() {
+		return {countOfReQuestsOnTheLevel, runwaysPerLevel};
+	}
+	void handleRequestResult(int result, Airplane* plane, LevelProgress* ourLevel,GLFWwindow* window);
+	void processQueue(std::priority_queue<Airplane*, std::vector<Airplane*>, CompareByTimeOnTheCircle>& queue, GLFWwindow* window, LevelProgress* ourLevel);
 };

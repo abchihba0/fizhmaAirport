@@ -12,74 +12,48 @@
 #include <sstream>
 
 
-//
-// int main() {
-// //
-//     Airport port;
-// 	std::cout << "Hello=) This is a game that simulates the work of an airport manager. \nDuring the game you need to process requests coming to the control center.\nYou can allow the takeoff or landing of the aircraft, or you can send the aircraft on a second circle. \nAt each level there is a certain number of requests that you will receive, you need to process them all.\nTo exit to the main menu, you can write exit at any time the game is going on." << std::endl;
-// 	std::string answer;
-// 	// port.returnMemory()[0]->countOfProcessedRequests = 11;
-// 	// port.returnMemory()[0]->countOfCorrectProcessedRequests = 11;
-// 	std::cout << "Are you ready to go(Y/n)?" << std::endl;
-// 	std::cin >> answer;
-// 	if(answer == "Y" || answer == "y") {
-// 		port.gameProcessing("Begin", 0); // begin отвечает за часть обработки уровня, перед или после. Нолик ни на что здесь не влияет, это тоже для окончания уровня
 
-// 	}
-	
-// 	return 0;
-// }
-// int main() {
-//     // Инициализация GLFW
-//     glfwInit();
-//     GLFWwindow* window = glfwCreateWindow(1280, 720, "Dear ImGui + GLFW", NULL, NULL);
-//     glfwMakeContextCurrent(window);
+// Добавлено объявление для SetupImGuiStyle
+void SetupImGuiStyle();
 
-//     // Инициализация ImGui
-//     IMGUI_CHECKVERSION();
-//     ImGui::CreateContext();
-//     ImGuiIO& io = ImGui::GetIO();
-//     io.Fonts->AddFontDefault();  // Шрифт
-
-//     // Бэкенды для GLFW и OpenGL
-//     ImGui_ImplGlfw_InitForOpenGL(window, true);
-//     ImGui_ImplOpenGL3_Init("#version 130");
-
-//     // Главный цикл
-//     while (!glfwWindowShouldClose(window)) {
-//         glfwPollEvents();
-
-//         // Начало кадра ImGui
-//         ImGui_ImplOpenGL3_NewFrame();
-//         ImGui_ImplGlfw_NewFrame();
-//         ImGui::NewFrame();
-
-//         // Ваш GUI
-//         ImGui::Begin("Hello, ImGui!");
-//         ImGui::Text("This is a demo window.");
-//         if (ImGui::Button("Close"))
-//             break;
-//         ImGui::End();
-
-//         // Рендеринг
-//         ImGui::Render();
-//         glClear(GL_COLOR_BUFFER_BIT);
-//         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-//         glfwSwapBuffers(window);
-//     }
-
-//     // Очистка
-//     ImGui_ImplOpenGL3_Shutdown();
-//     ImGui_ImplGlfw_Shutdown();
-//     ImGui::DestroyContext();
-//     glfwDestroyWindow(window);
-//     glfwTerminate();
-//     return 0;
-// }
+//GLFWwindow* window = nullptr;
 
 static void glfw_error_callback(int error, const char* description) {
     fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
+
+// Custom styling function
+void SetupImGuiStyle() {
+    ImGuiStyle& style = ImGui::GetStyle();
+    
+    // Colors
+    style.Colors[ImGuiCol_Text] = ImVec4(0.95f, 0.96f, 0.98f, 1.00f);
+    style.Colors[ImGuiCol_WindowBg] = ImVec4(0.13f, 0.14f, 0.17f, 1.00f);
+    style.Colors[ImGuiCol_ChildBg] = ImVec4(0.10f, 0.11f, 0.14f, 1.00f);
+    style.Colors[ImGuiCol_Border] = ImVec4(0.43f, 0.43f, 0.50f, 0.50f);
+    style.Colors[ImGuiCol_FrameBg] = ImVec4(0.25f, 0.25f, 0.30f, 1.00f);
+    style.Colors[ImGuiCol_FrameBgHovered] = ImVec4(0.35f, 0.35f, 0.40f, 1.00f);
+    style.Colors[ImGuiCol_FrameBgActive] = ImVec4(0.45f, 0.45f, 0.50f, 1.00f);
+    style.Colors[ImGuiCol_TitleBg] = ImVec4(0.08f, 0.08f, 0.09f, 1.00f);
+    style.Colors[ImGuiCol_TitleBgActive] = ImVec4(0.15f, 0.15f, 0.18f, 1.00f);
+    style.Colors[ImGuiCol_Button] = ImVec4(0.25f, 0.25f, 0.30f, 1.00f);
+    style.Colors[ImGuiCol_ButtonHovered] = ImVec4(0.35f, 0.35f, 0.40f, 1.00f);
+    style.Colors[ImGuiCol_ButtonActive] = ImVec4(0.45f, 0.45f, 0.50f, 1.00f);
+    
+    // Rounding
+    style.WindowRounding = 5.0f;
+    style.ChildRounding = 5.0f;
+    style.FrameRounding = 3.0f;
+    style.PopupRounding = 5.0f;
+    style.ScrollbarRounding = 5.0f;
+    style.GrabRounding = 3.0f;
+    style.TabRounding = 3.0f;
+    
+    // Padding
+    style.WindowPadding = ImVec2(10, 10);
+    style.FramePadding = ImVec2(10, 5);
+}
+
 
 int main() {
     // Setup GLFW
@@ -87,127 +61,112 @@ int main() {
     if (!glfwInit())
         return 1;
 
-    // Decide GL+GLSL versions
-    #if defined(IMGUI_IMPL_OPENGL_ES2)
-    const char* glsl_version = "#version 100";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_ES_API);
-    #else
-    const char* glsl_version = "#version 130";
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    #endif
-
     // Create window with graphics context
-    GLFWwindow* window = glfwCreateWindow(1280, 720, "Airport Manager Game", NULL, NULL);
+    GLFWmonitor* primaryMonitor = glfwGetPrimaryMonitor();
+    const GLFWvidmode* mode = glfwGetVideoMode(primaryMonitor);
+    GLFWwindow* window = glfwCreateWindow(mode->width, mode->height, "Airport Manager Game", primaryMonitor, NULL);
+    int windowWidth, windowHeight;
+    glfwGetWindowSize(window, &windowWidth, &windowHeight); // Получаем размеры основного окна
     if (window == NULL)
         return 1;
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
 
-    // Setup Dear ImGui context
+    // Setup Dear ImGui
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void)io;
-
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
+    io.FontGlobalScale = 1.5f; // Увеличивает все шрифты в 1.5 раза
+    SetupImGuiStyle();
 
     // Setup Platform/Renderer backends
     ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init(glsl_version);
+    ImGui_ImplOpenGL3_Init("#version 130");
 
-    // Our state
     Airport port;
-    bool show_welcome = true;
-    bool show_game = false;
-    bool show_level_complete = false;
-    int current_level = 0;
-    std::string game_output;
-    std::ostringstream output_stream;
-    
-    // Redirect cout to our string stream
-    auto old_cout_buf = std::cout.rdbuf(output_stream.rdbuf());
+    bool showMainMenu = true;
 
-    // Main loop
+    // Основной цикл
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
 
-        // Start the Dear ImGui frame
+        // Start the Dear ImGui frame (ТОЛЬКО ОДИН РАЗ ЗА КАДР)
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
 
-        // Welcome screen
-        if (show_welcome) {
-            ImGui::Begin("Welcome to Airport Manager", &show_welcome, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
-            ImGui::Text("Hello! This is a game that simulates the work of an airport manager.");
-            ImGui::Text("During the game you need to process requests coming to the control center.");
-            ImGui::Text("You can allow the takeoff or landing of the aircraft,");
-            ImGui::Text("or you can send the aircraft on a second circle.");
-            ImGui::Text("At each level there is a certain number of requests that you will receive,");
-            ImGui::Text("you need to process them all.");
-            ImGui::Text("To exit to the main menu, you can write exit at any time.");
+        if (showMainMenu) {
+            // Отрисовка главного меню
+            ImVec2 centerPos = ImVec2(
+                (windowWidth - 1500) * 0.5f,  // (ширина_экрана - ширина_окна) / 2
+                (windowHeight - 800) * 0.5f  // (высота_экрана - высота_окна) / 2
+            );
+            ImGui::SetNextWindowPos(centerPos, ImGuiCond_Always); // Всегда центрировать
+            ImGui::SetNextWindowSize(ImVec2(1500, 800), ImGuiCond_Always); // Фиксированный размер
             
-            if (ImGui::Button("Start Game")) {
-                show_welcome = false;
-                show_game = true;
-                port.gameProcessing("Begin", 0);
+            ImGui::Begin("Main Menu", nullptr, 
+                ImGuiWindowFlags_NoTitleBar | 
+                ImGuiWindowFlags_NoResize | 
+                ImGuiWindowFlags_NoMove);
+            
+            ImGui::TextColored(ImVec4(0.0f, 0.8f, 1.0f, 1.0f), "Airport Manager Game");
+            ImGui::Separator();
+            
+            ImGui::TextWrapped("Welcome to the Airport Manager simulation game! This is a game that simulates the work of an airport manager.");
+            ImGui::Spacing();
+            
+            ImGui::TextColored(ImVec4(0.0f, 0.8f, 1.0f, 1.0f), "Game Rules:");
+            ImGui::BulletText("Process requests coming to the control center");
+            ImGui::BulletText("Allow aircraft to take off or land on the appropriate runways");
+            ImGui::BulletText("If necessary, send planes to the second circle");
+            ImGui::BulletText("At each level there is a certain number of requests that you will receive, you need to process them all");
+            
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+            ImGui::Spacing();
+            
+            ImGui::Text("Type 'exit' at any time to return to this menu");
+            
+            ImGui::Spacing();
+            ImGui::Spacing();
+            ImGui::Spacing();
+            
+            ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 200) * 0.5f);
+            if (ImGui::Button("Start Game", ImVec2(200, 40))) {
+                showMainMenu = false;
             }
-            
-            if (ImGui::Button("Exit")) {
+            ImGui::SetCursorPosX((ImGui::GetWindowWidth() - 200) * 0.5f);
+            if (ImGui::Button("Exit", ImVec2(200, 40))) {
                 glfwSetWindowShouldClose(window, true);
             }
-            ImGui::End();
-        }
-
-        // Game screen - shows the console output
-        if (show_game) {
-            ImGui::Begin("Airport Manager Game", &show_game, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
             
-            // Display the game output
-            ImGui::BeginChild("ConsoleOutput", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()), true);
-            ImGui::TextUnformatted(output_stream.str().c_str());
-            ImGui::SetScrollHereY(1.0f);
-            ImGui::EndChild();
-             
-            // Input field
-            static char input_buf[256] = "";
-            ImGui::PushItemWidth(-1);
-            if (ImGui::InputText("##Input", input_buf, IM_ARRAYSIZE(input_buf), ImGuiInputTextFlags_EnterReturnsTrue)) {
-                // Process input
-                std::string input = input_buf;
-                if (input == "exit") {
-                    show_game = false;
-                    show_welcome = true;
-                    output_stream.str(""); // Clear output
-                } else {
-                    // Process the input (you'll need to adapt this to your game's input system)
-                    output_stream << "> " << input << "\n";
-                    // Here you would normally pass the input to your game logic
-                }
-                strcpy(input_buf, "");
+            ImGui::End();
+        } else {
+            // Запуск игровой логики
+            static bool gameInitialized = false;
+            if (!gameInitialized) {
+                port.gameProcessing("Begin", 0, window);
+                gameInitialized = true;
             }
-            ImGui::PopItemWidth();
-            
-            ImGui::End();
+            // Кнопка возврата в меню
+            if (ImGui::Button("Back to Menu", ImVec2(200, 40))) {
+                showMainMenu = true;
+            }
         }
 
-        // Rendering
+        // Rendering (ТОЛЬКО ОДИН РАЗ ЗА КАДР)
         ImGui::Render();
         int display_w, display_h;
         glfwGetFramebufferSize(window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
-        glClearColor(0.45f, 0.55f, 0.60f, 1.00f);
+        glClearColor(0.09f, 0.10f, 0.12f, 1.00f);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
         glfwSwapBuffers(window);
     }
 
     // Cleanup
-    std::cout.rdbuf(old_cout_buf); // Restore cout
     ImGui_ImplOpenGL3_Shutdown();
     ImGui_ImplGlfw_Shutdown();
     ImGui::DestroyContext();
